@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06111f">
+<title>Thiasus — D&D Cockpit</title>
+<style>
+:root{
+  --bg:#06111f; --panel:#0b1b2c; --panel2:#10263b; --line:#244663;
+  --text:#edf5fb; --muted:#9db3c7; --blue:#5bc7ff; --cyan:#7fe6ff;
+  --gold:#d7b56d; --green:#48d8b0; --red:#ff6878; --purple:#b894ff;
+}
+*{box-sizing:border-box} html,body{margin:0;background:radial-gradient(circle at 70% 0%,#173653 0,#06111f 45%,#030a12 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+button{font:inherit;color:inherit}
+.app{min-height:100vh;padding:18px 18px 92px;max-width:1500px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:14px}.sigil{width:52px;height:52px;border:1px solid #376582;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,#123553,#071522);font-size:28px;box-shadow:0 0 25px #1786bb33}
+h1{font-size:25px;margin:0}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}
+.header-actions{display:flex;gap:8px}.icon-btn,.small-btn{background:#0c2032;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1.1fr 1.15fr 1fr;gap:12px}
+.card{background:linear-gradient(150deg,#0d2032e8,#071522e8);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:inset 0 1px #ffffff08,0 8px 28px #0006}
+.card h2{font-size:13px;letter-spacing:.11em;text-transform:uppercase;color:#c4d5e3;margin:0 0 12px}
+.hero{grid-column:span 2;display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
+.hpbox{display:flex;align-items:center;gap:15px}.heart{font-size:34px}.hpnum{font-size:44px;font-weight:700;line-height:1}.hpnum span{font-size:18px;color:var(--muted);font-weight:500}
+.hpbar{height:8px;background:#172c3c;border-radius:99px;overflow:hidden;margin-top:10px}.hpfill{height:100%;background:linear-gradient(90deg,#24c9b4,#67d9ff);width:93%}
+.controls{display:flex;gap:6px;margin-top:10px}.controls button{flex:1;background:#0e2a3c;border:1px solid #31516a;border-radius:10px;padding:7px;cursor:pointer}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.stat{background:#091b2b;border:1px solid #203e57;border-radius:13px;padding:10px;text-align:center}.stat .label{font-size:10px;color:var(--muted);text-transform:uppercase}.stat .value{font-size:22px;font-weight:700;margin-top:3px}
+.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.resource{border:1px solid #3a5166;border-radius:13px;padding:10px;display:flex;align-items:center;justify-content:space-between;background:#0a1a29}.resource strong{font-size:20px}.resource button{border:1px solid #45677f;background:#102b3e;border-radius:8px;padding:5px 9px;cursor:pointer}
+.resource .name{font-size:12px;color:#bfd0dd}.resource .sub{font-size:10px;color:var(--muted)}
+.section{margin-top:12px}
+.spellslots{display:grid;gap:8px}.slotrow{display:flex;align-items:center;gap:9px}.slotlabel{width:50px;color:#c9d8e3;font-size:12px}.orbs{display:flex;gap:5px;flex:1}.orb{width:18px;height:18px;border-radius:50%;border:1px solid #4b7690;background:#152b3d;cursor:pointer}.orb.used{background:#2c4b61}.orb.full{background:radial-gradient(circle at 35% 30%,#d9fbff,#53c9ff 45%,#246c9b);box-shadow:0 0 9px #53c9ff66}.slotcount{font-size:12px;color:var(--muted)}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.action{min-height:72px;border:1px solid #2d6181;border-radius:14px;background:linear-gradient(145deg,#0d3150,#091b2c);cursor:pointer;padding:10px;text-align:left}.action:active,.action.active{box-shadow:0 0 0 2px #58cfff55,0 0 25px #48caff22}.action .icon{font-size:21px}.action b{display:block;margin-top:5px}.action small{color:var(--muted)}
+.attack-list{display:grid;gap:7px}.attack{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;padding:9px;border:1px solid #203f58;border-radius:12px;background:#081827;cursor:pointer}.attack .ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#15344b}.attack b{font-size:13px}.attack small{display:block;color:var(--muted);margin-top:2px}.tag{font-size:10px;color:#b9d7e9;border:1px solid #35566d;padding:4px 6px;border-radius:7px}
+.spells{display:grid;gap:6px;max-height:390px;overflow:auto}.spell{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #183247;cursor:pointer}.spell:last-child{border-bottom:0}.spell b{font-size:12px}.spell small{display:block;color:var(--muted)}.prepared{color:var(--green)}
+.condition-row{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}.chip{background:#102a3e;border:1px solid #31546c;border-radius:999px;padding:7px 10px;font-size:11px}.chip button{background:none;border:0;padding:0 0 0 6px;color:#8fa9ba;cursor:pointer}
+.conc{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#081927;border:1px solid #294a61;border-radius:12px;padding:10px}.conc-name{font-weight:600}.conc small{display:block;color:var(--muted);margin-top:2px}.toggle{width:44px;height:25px;border-radius:20px;background:#233c4d;border:1px solid #466174;cursor:pointer}.toggle.on{background:#1d9ec6}.toggle:after{content:"";display:block;width:19px;height:19px;background:white;border-radius:50%;margin:2px;transition:.2s}.toggle.on:after{transform:translateX(18px)}
+.note{font-size:12px;color:var(--muted);line-height:1.5}.quote{font-style:italic;color:#c9d5df;border-left:2px solid var(--gold);padding-left:10px}
+.bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:min(900px,calc(100% - 24px));background:#071522ee;backdrop-filter:blur(18px);border:1px solid #284961;border-radius:18px;display:grid;grid-template-columns:repeat(6,1fr);padding:5px;z-index:10;box-shadow:0 12px 35px #0009}.nav{border:0;background:transparent;border-radius:13px;padding:9px 4px;color:#8fa6b8;cursor:pointer;font-size:11px}.nav.active{background:#12344d;color:white;box-shadow:inset 0 0 18px #31bfff22}.nav span{display:block;font-size:18px;margin-bottom:2px}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;z-index:20}.modal.show{display:flex}.sheet{width:min(720px,100%);background:#091a29;border:1px solid #34536a;border-radius:24px 24px 0 0;padding:18px;max-height:82vh;overflow:auto}.sheet-head{display:flex;justify-content:space-between;align-items:start}.sheet h3{font-size:22px;margin:0}.sheet p{color:#bfd0dd;line-height:1.5}.close{border:1px solid #3a566b;background:#10263a;border-radius:10px;padding:7px 11px;cursor:pointer}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:#d7b56d;color:#09131d;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:700;transition:.25s;z-index:30}.toast.show{transform:translateX(-50%) translateY(0)}
+
+.view{display:none}.view.active{display:block}
+.spellbook-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.spellbook-title{font-size:28px;font-weight:800}.spellbook-meta{color:var(--muted);font-size:12px;margin-top:4px}
+.spell-filters{display:flex;gap:7px;overflow:auto;padding-bottom:5px;margin-bottom:10px}.filter{white-space:nowrap;background:#0c2032;border:1px solid var(--line);border-radius:999px;padding:8px 12px;cursor:pointer;color:#a9c0d0}.filter.active{background:#123c57;color:#fff;border-color:#4aa8d0}
+.spell-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.spell-card{position:relative;background:linear-gradient(145deg,#0d2235,#081522);border:1px solid #244a64;border-radius:16px;padding:13px;cursor:pointer;min-height:104px;transition:.15s}
+.spell-card:active{transform:scale(.99);border-color:#5bc7ff}
+.spell-card .spell-top{display:flex;justify-content:space-between;gap:8px}.spell-name{font-size:15px;font-weight:750}.spell-level{font-size:10px;border:1px solid #385c73;border-radius:7px;padding:4px 6px;color:#b8d8e8}
+.spell-type{font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}.spell-desc{font-size:11px;color:var(--muted);line-height:1.4;margin-top:9px}
+.active-spell{border:1px solid #4ccfff;background:linear-gradient(145deg,#103a50,#0a1d2b);box-shadow:0 0 28px #3fcfff22}.active-spell h2{color:#dff8ff}.active-banner{display:flex;align-items:center;justify-content:space-between;gap:10px}.active-badge{color:#7fe6ff;font-size:10px;font-weight:800;letter-spacing:.12em}.end-btn{background:#421f2b;border:1px solid #8b4355;border-radius:10px;padding:8px 12px;cursor:pointer}
+.cast-panel{display:grid;gap:10px}.cast-panel button{border:1px solid #315a72;background:#102d42;border-radius:12px;padding:11px;cursor:pointer;text-align:left}.cast-panel button:hover{border-color:#5bc7ff}.cast-panel .primary{background:linear-gradient(135deg,#15516e,#0b3048);border-color:#5bc7ff}
+.cast-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.cast-grid button{text-align:center}
+.spell-detail{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}.detail{background:#071725;border:1px solid #1e3d52;border-radius:10px;padding:8px}.detail small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.detail b{display:block;margin-top:2px;font-size:11px}
+@media(max-width:800px){.spell-grid{grid-template-columns:1fr}.spell-detail{grid-template-columns:repeat(2,1fr)}}
+
+@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.hero{grid-column:span 2}}
+@media(max-width:700px){.app{padding:10px 10px 90px}.grid{grid-template-columns:1fr}.hero{grid-column:span 1;grid-template-columns:1fr}.actions{grid-template-columns:repeat(2,1fr)}.bottom{width:calc(100% - 12px);bottom:6px}.nav{font-size:9px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><div class="sigil">⚡</div><div><h1>Thiasus Hypsicerus</h1><div class="subtitle">Satyr · Tempest Cleric · Level 6 · Anthropologist</div></div></div>
+  <div class="header-actions"><button class="icon-btn" onclick="resetAll()">↺</button></div>
+</header>
+
+<div id="combatView" class="view active"><div class="grid">
+  <section class="card hero">
+    <div>
+      <h2>Vitality</h2>
+      <div class="hpbox"><div class="heart">♥</div><div><div class="hpnum" id="hp">45<span> / 45</span></div><div class="hpbar"><div class="hpfill" id="hpfill"></div></div></div></div>
+      <div class="controls"><button onclick="changeHP(1)">+ 1</button><button onclick="changeHP(-1)">− 1</button><button onclick="changeHP(-5)">− 5</button><button onclick="changeHP(5)">+ 5</button></div>
+      <div class="section"><div class="statrow"><div class="stat"><div class="label">Temp HP</div><div class="value" id="temp">0</div></div><div class="stat"><div class="label">AC</div><div class="value">17</div></div><div class="stat"><div class="label">Speed</div><div class="value">35</div></div></div></div>
+    </div>
+    <div>
+      <h2>Combat Stats</h2>
+      <div class="statrow"><div class="stat"><div class="label">Initiative</div><div class="value">+2</div></div><div class="stat"><div class="label">Spell Attack</div><div class="value">+7</div></div><div class="stat"><div class="label">Save DC</div><div class="value">15</div></div></div>
+      <div class="section"><div class="resource-grid">
+        <div class="resource"><div><div class="name">Channel Divinity</div><div class="sub">2 / short rest</div></div><strong id="cd">2</strong><button onclick="spend('cd',2)">−</button></div>
+        <div class="resource"><div><div class="name">Wrath of the Storm</div><div class="sub">4 / long rest</div></div><strong id="wrath">4</strong><button onclick="spend('wrath',4)">−</button></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Concentration</h2>
+    <div class="conc"><div><div class="conc-name" id="concName">None</div><small id="concDesc">No concentration spell active.</small></div><button class="toggle" id="concToggle" onclick="toggleConc()"></button></div>
+    <div class="section"><h2>Conditions</h2><div class="condition-row" id="conditions"><span class="note">None</span></div><div class="controls"><button onclick="addCondition()">+ Add condition</button></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Spell Slots</h2>
+    <div class="spellslots" id="slots"></div>
+  </section>
+
+  <section class="card">
+    <h2>Quick Actions</h2>
+    <div class="actions">
+      <button class="action" onclick="markAction('Action')"><div class="icon">⚔</div><b>Action</b><small id="actionState">Available</small></button>
+      <button class="action" onclick="markAction('Bonus Action')"><div class="icon">✦</div><b>Bonus Action</b><small id="bonusState">Available</small></button>
+      <button class="action" onclick="markAction('Reaction')"><div class="icon">↻</div><b>Reaction</b><small id="reactionState">Available</small></button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Main Attacks & Cantrips</h2>
+    <div class="attack-list">
+      <div class="attack" onclick="showSpell('Sacred Flame')"><div class="ico">☀</div><div><b>Sacred Flame</b><small>DEX save · 2d8 radiant · 60 ft</small></div><span class="tag">CANTRIP</span></div>
+      <div class="attack" onclick="showSpell('Toll the Dead')"><div class="ico">☠</div><div><b>Toll the Dead</b><small>WIS save · 2d8 / 2d12 necrotic · 60 ft</small></div><span class="tag">CANTRIP</span></div>
+      <div class="attack" onclick="showSpell('Guiding Bolt')"><div class="ico">✹</div><div><b>Guiding Bolt</b><small>+7 to hit · 4d6 radiant · 120 ft</small></div><span class="tag">L1</span></div>
+      <div class="attack" onclick="showSpell('Thunderwave')"><div class="ico">⚡</div><div><b>Thunderwave</b><small>CON save · 2d8 thunder · 15-ft cube</small></div><span class="tag">L1</span></div>
+      <div class="attack" onclick="showSpell('Shatter')"><div class="ico">ϟ</div><div><b>Shatter</b><small>CON save · 3d8 thunder · 60 ft</small></div><span class="tag">L2</span></div>
+      <div class="attack" onclick="showSpell('Spiritual Weapon')"><div class="ico">⚔</div><div><b>Spiritual Weapon</b><small>Bonus action · +7 · 1d8+4 force</small></div><span class="tag">L2</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Prepared Spells · 10</h2>
+    <div class="spells">
+      <div class="spell" onclick="showSpell('Detect Magic')"><span>◌</span><div><b>Detect Magic</b><small>Ritual · concentration</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Fog Cloud')"><span>☁</span><div><b>Fog Cloud</b><small>Concentration · heavily obscured</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Healing Word')"><span>✚</span><div><b>Healing Word</b><small>Bonus action · 60 ft · 1d4+4</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Protection from Evil and Good')"><span>◉</span><div><b>Protection from Evil and Good</b><small>Concentration · touch</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Aid')"><span>✚</span><div><b>Aid</b><small>8 hours · up to 3 creatures</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Gust of Wind')"><span>≋</span><div><b>Gust of Wind</b><small>Concentration · 60-ft line</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Prayer of Healing')"><span>✚</span><div><b>Prayer of Healing</b><small>10 minutes · up to 6 creatures</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Silence')"><span>◯</span><div><b>Silence</b><small>Ritual · concentration · 120 ft</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Bestow Curse')"><span>☠</span><div><b>Bestow Curse</b><small>Concentration · touch · WIS save</small></div><span>L3</span></div>
+      <div class="spell" onclick="showSpell('Spirit Guardians')"><span>✥</span><div><b>Spirit Guardians</b><small>Concentration · 15-ft emanation</small></div><span>L3</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Tempest Domain</h2>
+    <div class="attack-list">
+      <div class="attack" onclick="showInfo('Destructive Wrath','Channel Divinity: when you roll lightning or thunder damage, you can maximize it instead of rolling.')"><div class="ico">⚡</div><div><b>Destructive Wrath</b><small>Channel Divinity · maximize lightning/thunder</small></div></div>
+      <div class="attack" onclick="showInfo('Thunderbolt Strike','When you deal lightning damage to a Large or smaller creature, you can push it up to 10 ft.')"><div class="ico">↯</div><div><b>Thunderbolt Strike</b><small>Lightning damage → push up to 10 ft</small></div></div>
+    </div>
+    <div class="section quote">“The storm is not just destruction — it is a reminder of what still lives.”</div>
+  </section>
+
+  <section class="card">
+    <h2>Character Snapshot</h2>
+    <div class="statrow">
+      <div class="stat"><div class="label">STR</div><div class="value">8</div></div>
+      <div class="stat"><div class="label">DEX</div><div class="value">14</div></div>
+      <div class="stat"><div class="label">CON</div><div class="value">14</div></div>
+      <div class="stat"><div class="label">INT</div><div class="value">10</div></div>
+      <div class="stat"><div class="label">WIS</div><div class="value">19</div></div>
+      <div class="stat"><div class="label">CHA</div><div class="value">10</div></div>
+    </div>
+    <div class="section note">Saving throws: STR −1 · DEX +2 · CON +2 · INT +0 · WIS +7 · CHA +3<br>Passive Perception 14 · Proficiency Bonus +3</div>
+  </section>
+</div></div>
+
+<div id="spellsView" class="view"></div>
+
+<nav class="bottom">
+  <button class="nav active" onclick="switchView('combat',this)"><span>⚔</span>Combat</button>
+  <button class="nav" onclick="switchView('spells',this)"><span>📖</span>Spells</button>
+  <button class="nav" onclick="toast('Character page coming next')"><span>♙</span>Character</button>
+  <button class="nav" onclick="toast('Inventory page coming next')"><span>🎒</span>Inventory</button>
+  <button class="nav" onclick="toast('Quick Rules coming next')"><span>📜</span>Rules</button>
+  <button class="nav" onclick="toast('Campaign Notes coming next')"><span>✎</span>Notes</button>
+</nav>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+ <div class="sheet"><div class="sheet-head"><div><h3 id="modalTitle"></h3><div class="subtitle" id="modalSub"></div></div><button class="close" onclick="closeModal()">Close</button></div><p id="modalBody"></p><div id="modalButtons"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const maxHP=45;
+let state={hp:45,temp:0,cd:2,wrath:4,slots:{1:4,2:3,3:3},conc:null,activeSpell:null,conditions:[],actions:{Action:false,'Bonus Action':false,Reaction:false},fey:{dissonant:true,misty:true}};
+const spellData={
+"Sacred Flame":{level:0,school:"Evocation",time:"1 action",range:"60 ft",duration:"Instantaneous",save:"DEX save",damage:"2d8 radiant",desc:"A creature you can see within range makes a Dexterity saving throw. On a failed save it takes 2d8 radiant damage; no benefit from cover.",cantrip:true},
+"Spare the Dying":{level:0,school:"Necromancy",time:"1 action",range:"15 ft",duration:"Instantaneous",desc:"Touch a creature at 0 hit points and stabilize it.",cantrip:true},
+"Thaumaturgy":{level:0,school:"Transmutation",time:"1 action",range:"30 ft",duration:"Up to 1 min",desc:"Create minor supernatural effects such as booming voice, flames, harmless tremors, or opening/closing an unlocked door.",cantrip:true},
+"Toll the Dead":{level:0,school:"Necromancy",time:"1 action",range:"60 ft",duration:"Instantaneous",save:"WIS save",damage:"2d8 / 2d12 necrotic",desc:"On a failed Wisdom save, the target takes 2d8 necrotic damage, or 2d12 if it is missing any hit points.",cantrip:true},
+"Detect Magic":{level:1,school:"Divination",time:"1 action / ritual",range:"Self",duration:"Concentration, 10 min",desc:"Sense the presence of magic within 30 ft and use your action to see faint magical auras and learn their school.",concentration:true,ritual:true},
+"Dissonant Whispers":{level:1,school:"Enchantment",time:"1 action",range:"60 ft",duration:"Instantaneous",save:"WIS save",damage:"3d6 psychic",desc:"On a failed save, the target takes 3d6 psychic damage and must immediately use its reaction to move as far away as its speed allows. On success, half damage and no forced movement.",fey:true},
+"Fog Cloud":{level:1,school:"Conjuration",time:"1 action",range:"120 ft",duration:"Concentration, 1 hour",desc:"Create a 20-ft-radius sphere of fog that is heavily obscured. The radius increases by 20 ft per slot above 1st.",concentration:true,ritual:false},
+"Guiding Bolt":{level:1,school:"Evocation",time:"1 action",range:"120 ft",duration:"1 round",damage:"4d6 radiant",desc:"Make a ranged spell attack (+7). On a hit, the target takes 4d6 radiant damage, and the next attack against it before the end of your next turn has advantage."},
+"Healing Word":{level:1,school:"Evocation",time:"1 bonus action",range:"60 ft",duration:"Instantaneous",damage:"1d4+4 healing",desc:"A creature you can see within range regains 1d4 + 4 hit points. It has no effect on undead or constructs."},
+"Protection from Evil and Good":{level:1,school:"Abjuration",time:"1 action",range:"Touch",duration:"Concentration, 10 min",desc:"Protects one willing creature against aberrations, celestials, elementals, fey, fiends, and undead; their attacks have disadvantage and the target cannot be charmed, frightened, or possessed by them.",concentration:true},
+"Thunderwave":{level:1,school:"Evocation",time:"1 action",range:"Self (15-ft cube)",duration:"Instantaneous",save:"CON save",damage:"2d8 thunder",desc:"Each creature in the cube makes a Constitution save. Failed save: 2d8 thunder and pushed 10 ft. Success: half damage and no push."},
+"Aid":{level:2,school:"Abjuration",time:"1 action",range:"30 ft",duration:"8 hours",damage:"+5 max/current HP",desc:"Up to three creatures gain +5 to maximum and current hit points. Higher slots increase the bonus by 5 per slot level."},
+"Gust of Wind":{level:2,school:"Evocation",time:"1 action",range:"Self (60-ft line)",duration:"Concentration, 1 min",save:"STR save",desc:"Creatures in the line make a Strength save or are pushed 15 ft. Movement toward you is difficult. You can redirect the line as a bonus action.",concentration:true},
+"Misty Step":{level:2,school:"Conjuration",time:"1 bonus action",range:"Self",duration:"Instantaneous",desc:"Briefly surrounded by silvery mist, teleport up to 30 ft to an unoccupied space you can see.",fey:true},
+"Prayer of Healing":{level:2,school:"Abjuration",time:"10 minutes",range:"30 ft",duration:"Instantaneous",damage:"2d8+4 healing",desc:"Up to six creatures regain 2d8 + 4 hit points. Higher slots add 1d8 healing per slot level."},
+"Shatter":{level:2,school:"Evocation",time:"1 action",range:"60 ft",duration:"Instantaneous",save:"CON save",damage:"3d8 thunder",desc:"A 10-ft-radius sphere. Creatures make a Constitution save for 3d8 thunder damage, half on success. Inorganic material has disadvantage."},
+"Silence":{level:2,school:"Illusion",time:"1 action / ritual",range:"120 ft",duration:"Concentration, 10 min",desc:"Create a 20-ft-radius sphere where no sound can be created or passed. Verbal spell components cannot be used inside; creatures and objects are immune to thunder damage.",concentration:true,ritual:true},
+"Spiritual Weapon":{level:2,school:"Evocation",time:"1 bonus action",range:"60 ft",duration:"1 min",damage:"1d8+4 force",desc:"Create a spectral weapon and make a melee spell attack (+7) for 1d8+4 force. As a bonus action, move it 20 ft and repeat the attack."},
+"Bestow Curse":{level:3,school:"Necromancy",time:"1 action",range:"Touch",duration:"Concentration, 1 min",save:"WIS save",desc:"On a failed save, choose a curse: disadvantage on an ability's checks and saves; disadvantage on attacks against you; a chance to waste its action; or your attacks and spells deal +1d8 necrotic damage.",concentration:true},
+"Call Lightning":{level:3,school:"Conjuration",time:"1 action",range:"120 ft",duration:"Concentration, 10 min",save:"DEX save",damage:"3d10 lightning",desc:"Create a storm cloud in a 60-ft radius. Call lightning on a point within it; creatures in a 5-ft radius make a Dexterity save for 3d10 lightning. Repeat on later turns.",concentration:true},
+"Sleet Storm":{level:3,school:"Conjuration",time:"1 action",range:"150 ft",duration:"Concentration, 1 min",save:"DEX save",desc:"A 40-ft-radius cylinder becomes heavily obscured and difficult terrain. Creatures can fall prone, and concentration checks made inside are against DC 15.",concentration:true},
+"Spirit Guardians":{level:3,school:"Conjuration",time:"1 action",range:"Self (15-ft emanation)",duration:"Concentration, 10 min",save:"WIS save",damage:"3d8 radiant / necrotic",desc:"Selected creatures are unaffected. Others have halved speed and make a Wisdom save when entering or ending their turn in the emanation, taking 3d8 radiant or necrotic damage, half on success.",concentration:true}
+};
+const prepared=["Detect Magic","Fog Cloud","Guiding Bolt","Healing Word","Protection from Evil and Good","Thunderwave","Aid","Gust of Wind","Prayer of Healing","Shatter","Silence","Spiritual Weapon","Bestow Curse","Call Lightning","Sleet Storm","Spirit Guardians"];
+const cantrips=["Sacred Flame","Spare the Dying","Thaumaturgy","Toll the Dead"];
+const feyTouched=["Dissonant Whispers","Misty Step"];
+
+function save(){localStorage.setItem('thiasusCockpit',JSON.stringify(state))}
+function load(){try{const s=JSON.parse(localStorage.getItem('thiasusCockpit'));if(s)state=Object.assign(state,s)}catch(e){}}
+function render(){
+ document.getElementById('hp').innerHTML=`${state.hp}<span> / ${maxHP}</span>`;
+ document.getElementById('temp').textContent=state.temp;
+ document.getElementById('hpfill').style.width=Math.max(0,Math.min(100,state.hp/maxHP*100))+'%';
+ document.getElementById('cd').textContent=state.cd; document.getElementById('wrath').textContent=state.wrath;
+ const slots=document.getElementById('slots'); slots.innerHTML='';
+ [1,2,3].forEach(l=>{const total={1:4,2:3,3:3}[l];let row=document.createElement('div');row.className='slotrow';row.innerHTML=`<div class="slotlabel">Level ${l}</div><div class="orbs">${Array.from({length:total},(_,i)=>`<button class="orb ${i<state.slots[l]?'full':''} ${i>=state.slots[l]?'used':''}" onclick="useSlot(${l},${i})"></button>`).join('')}</div><div class="slotcount">${state.slots[l]} / ${total}</div>`;slots.appendChild(row)});
+ document.getElementById('concName').textContent=state.conc||'None';
+ document.getElementById('concDesc').textContent=state.conc?`Active · ${spellData[state.conc]?.duration||'concentration'} · tap to end.`:'No concentration spell active.';
+ document.getElementById('concToggle').classList.toggle('on',!!state.conc);
+ const c=document.getElementById('conditions'); c.innerHTML=state.conditions.length?state.conditions.map((x,i)=>`<span class="chip">${x}<button onclick="removeCondition(${i})">×</button></span>`).join(''):'<span class="note">None</span>';
+ ['Action','Bonus Action','Reaction'].forEach(a=>document.getElementById(a==='Bonus Action'?'bonusState':a.toLowerCase()+'State').textContent=state.actions[a]?'Used':'Available');
+ renderActiveSpell(); save();
+}
+function changeHP(n){state.hp=Math.max(0,Math.min(maxHP,state.hp+n));render();toast(n>0?`Healed ${n} HP`:`Took ${Math.abs(n)} damage`)}
+function spend(k){if(state[k]>0){state[k]--;render();toast(`${k==='cd'?'Channel Divinity':'Wrath of the Storm'} used`)}else toast('No uses remaining')}
+function useSlot(l,i){if(i<state.slots[l]){state.slots[l]--;render();toast(`Level ${l} spell slot used`)}else if(state.slots[l] < {1:4,2:3,3:3}[l]){state.slots[l]++;render();toast(`Level ${l} spell slot restored`)}}
+function markAction(a){state.actions[a]=!state.actions[a];render();toast(`${a}: ${state.actions[a]?'USED':'AVAILABLE'}`)}
+function toggleConc(){if(state.conc){endConcentration()}else showInfo('Concentration','Choose a concentration spell from the Spellbook to activate it.')}
+function endConcentration(){const old=state.conc;state.conc=null;state.activeSpell=null;render();toast(`${old||'Concentration'} ended`)}
+function addCondition(){const x=prompt('Condition name (e.g. Prone, Frightened, Poisoned):');if(x){state.conditions.push(x.trim());render()}}
+function removeCondition(i){state.conditions.splice(i,1);render()}
+function switchView(view,btn){
+ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+ document.getElementById(view==='combat'?'combatView':'spellsView').classList.add('active');
+ document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active')); if(btn)btn.classList.add('active');
+ if(view==='spells')renderSpellbook();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderSpellbook(filter='all'){
+ const root=document.getElementById('spellsView');
+ const active=state.activeSpell?spellData[state.activeSpell]:null;
+ const list=[...cantrips,...prepared,...feyTouched].filter((v,i,a)=>a.indexOf(v)===i).filter(n=>filter==='all'||(filter==='cantrip'&&spellData[n].cantrip)||(filter==='1'&&spellData[n].level===1)||(filter==='2'&&spellData[n].level===2)||(filter==='3'&&spellData[n].level===3)||(filter==='fey'&&spellData[n].fey));
+ root.innerHTML=`<div class="spellbook-head"><div><div class="spellbook-title">Spellbook</div><div class="spellbook-meta">WIS 19 · Spell Attack +7 · Save DC 15 · 10 cleric spells prepared</div></div><button class="small-btn" onclick="switchView('combat',document.querySelector('.nav'))">⚔ Combat</button></div>
+ ${active?`<section class="card active-spell"><div class="active-banner"><div><div class="active-badge">⚡ ACTIVE SPELL · CONCENTRATION</div><h2 style="margin:5px 0 2px">${state.activeSpell}</h2><div class="subtitle">${active.duration}</div></div><button class="end-btn" onclick="endConcentration()">END</button></div><div class="spell-desc" style="margin-top:12px">${active.desc}</div></section><div style="height:10px"></div>`:''}
+ <div class="spell-filters">
+  <button class="filter active" onclick="renderSpellbook('all')">All</button><button class="filter" onclick="renderSpellbook('cantrip')">Cantrips</button><button class="filter" onclick="renderSpellbook('1')">1st</button><button class="filter" onclick="renderSpellbook('2')">2nd</button><button class="filter" onclick="renderSpellbook('3')">3rd</button><button class="filter" onclick="renderSpellbook('fey')">Fey Touched</button>
+ </div>
+ <div class="spell-grid">${list.map(n=>{const d=spellData[n];return `<div class="spell-card ${state.activeSpell===n?'active-spell':''}" onclick="openCast('${n.replace(/'/g,"\\'")}')"><div class="spell-top"><div><div class="spell-name">${n}</div><div class="spell-type">${d.cantrip?'Cantrip':d.fey?'Fey Touched':'Level '+d.level}</div></div><div class="spell-level">${d.cantrip?'—':'L'+d.level}</div></div><div class="spell-desc">${d.time} · ${d.range}${d.damage?' · '+d.damage:''}${d.concentration?' · Concentration':''}</div></div>`}).join('')}</div>`;
+}
+function openCast(name){
+ const d=spellData[name];
+ document.getElementById('modalTitle').textContent=name;
+ document.getElementById('modalSub').textContent=`${d.cantrip?'Cantrip':d.fey?'Fey Touched · '+d.level+'st/nd level':'Level '+d.level+' · '+d.school}`;
+ document.getElementById('modalBody').innerHTML=`<div class="spell-detail"><div class="detail"><small>Casting</small><b>${d.time}</b></div><div class="detail"><small>Range</small><b>${d.range}</b></div><div class="detail"><small>Duration</small><b>${d.duration}</b></div><div class="detail"><small>Effect</small><b>${d.damage||d.save||'—'}</b></div></div><div>${d.desc}</div>`;
+ let buttons='';
+ if(d.cantrip) buttons=`<div class="cast-panel"><button class="primary" onclick="castSpell('${name.replace(/'/g,"\\'")}',0)">CAST · No Slot</button></div>`;
+ else if(d.fey) buttons=`<div class="cast-panel">${state.fey[name==='Dissonant Whispers'?'dissonant':'misty']?`<button class="primary" onclick="castSpell('${name.replace(/'/g,"\\'")}',${d.level},true)">CAST · Fey Touched (1/Long Rest)</button>`:'<button disabled>Fey Touched use spent</button>'}<button onclick="castSpell('${name.replace(/'/g,"\\'")}',${d.level},false)">CAST · Use Spell Slot</button></div>`;
+ else {let max=3; buttons=`<div class="cast-panel"><div class="subtitle">Choose spell slot</div><div class="cast-grid">${[1,2,3].filter(l=>l>=d.level).map(l=>`<button class="${state.slots[l]>0?'primary':''}" ${state.slots[l]>0?'':'disabled'} onclick="castSpell('${name.replace(/'/g,"\\'")}',${l},false)">L${l} · ${state.slots[l]} left</button>`).join('')}</div>${d.ritual?`<button onclick="castSpell('${name.replace(/'/g,"\\'")}',0,false,true)">CAST AS RITUAL · No Slot</button>`:''}</div>`}
+ document.getElementById('modalButtons').innerHTML=buttons;
+ document.getElementById('modal').classList.add('show');
+}
+function castSpell(name,slot,fey=false,ritual=false){
+ const d=spellData[name];
+ if(!d.cantrip && !fey && !ritual && slot>0){if(!state.slots[slot]){toast('No slot available');return}state.slots[slot]--;}
+ if(fey){const key=name==='Dissonant Whispers'?'dissonant':'misty';if(!state.fey[key]){toast('Fey Touched use already spent');return}state.fey[key]=false;}
+ const action=d.time.includes('bonus')?'Bonus Action':'Action';
+ if(!d.cantrip)state.actions[action]=true;
+ if(d.concentration){if(state.conc&&state.conc!==name){toast(`Concentration changed: ${state.conc} → ${name}`)}state.conc=name;state.activeSpell=name;}
+ closeModal();render();renderSpellbook();toast(`${name} cast${ritual?' as ritual':''}${slot?` · L${slot}`:''}`);
+}
+function renderActiveSpell(){ }
+function showSpell(name){openCast(name)}
+function showInfo(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalSub').textContent='Thiasus · Tempest Domain';document.getElementById('modalBody').textContent=body;document.getElementById('modalButtons').innerHTML='';document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1400)}
+function resetAll(){if(confirm('Reset combat resources?')){state={hp:45,temp:0,cd:2,wrath:4,slots:{1:4,2:3,3:3},conc:null,conditions:[],actions:{Action:false,'Bonus Action':false,Reaction:false}};render();toast('Combat reset')}}
+load();render();renderSpellbook();
+</script>
+</body>
+</html>

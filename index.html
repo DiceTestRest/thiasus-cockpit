@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06111f">
+<title>Thiasus — D&D Cockpit</title>
+<style>
+:root{
+  --bg:#06111f; --panel:#0b1b2c; --panel2:#10263b; --line:#244663;
+  --text:#edf5fb; --muted:#9db3c7; --blue:#5bc7ff; --cyan:#7fe6ff;
+  --gold:#d7b56d; --green:#48d8b0; --red:#ff6878; --purple:#b894ff;
+}
+*{box-sizing:border-box} html,body{margin:0;background:radial-gradient(circle at 70% 0%,#173653 0,#06111f 45%,#030a12 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+button{font:inherit;color:inherit}
+.app{min-height:100vh;padding:18px 18px 92px;max-width:1500px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:14px}.sigil{width:52px;height:52px;border:1px solid #376582;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,#123553,#071522);font-size:28px;box-shadow:0 0 25px #1786bb33}
+h1{font-size:25px;margin:0}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}
+.header-actions{display:flex;gap:8px}.icon-btn,.small-btn{background:#0c2032;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1.1fr 1.15fr 1fr;gap:12px}
+.card{background:linear-gradient(150deg,#0d2032e8,#071522e8);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:inset 0 1px #ffffff08,0 8px 28px #0006}
+.card h2{font-size:13px;letter-spacing:.11em;text-transform:uppercase;color:#c4d5e3;margin:0 0 12px}
+.hero{grid-column:span 2;display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
+.hpbox{display:flex;align-items:center;gap:15px}.heart{font-size:34px}.hpnum{font-size:44px;font-weight:700;line-height:1}.hpnum span{font-size:18px;color:var(--muted);font-weight:500}
+.hpbar{height:8px;background:#172c3c;border-radius:99px;overflow:hidden;margin-top:10px}.hpfill{height:100%;background:linear-gradient(90deg,#24c9b4,#67d9ff);width:93%}
+.controls{display:flex;gap:6px;margin-top:10px}.controls button{flex:1;background:#0e2a3c;border:1px solid #31516a;border-radius:10px;padding:7px;cursor:pointer}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.stat{background:#091b2b;border:1px solid #203e57;border-radius:13px;padding:10px;text-align:center}.stat .label{font-size:10px;color:var(--muted);text-transform:uppercase}.stat .value{font-size:22px;font-weight:700;margin-top:3px}
+.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.resource{border:1px solid #3a5166;border-radius:13px;padding:10px;display:flex;align-items:center;justify-content:space-between;background:#0a1a29}.resource strong{font-size:20px}.resource button{border:1px solid #45677f;background:#102b3e;border-radius:8px;padding:5px 9px;cursor:pointer}
+.resource .name{font-size:12px;color:#bfd0dd}.resource .sub{font-size:10px;color:var(--muted)}
+.section{margin-top:12px}
+.spellslots{display:grid;gap:8px}.slotrow{display:flex;align-items:center;gap:9px}.slotlabel{width:50px;color:#c9d8e3;font-size:12px}.orbs{display:flex;gap:5px;flex:1}.orb{width:18px;height:18px;border-radius:50%;border:1px solid #4b7690;background:#152b3d;cursor:pointer}.orb.used{background:#2c4b61}.orb.full{background:radial-gradient(circle at 35% 30%,#d9fbff,#53c9ff 45%,#246c9b);box-shadow:0 0 9px #53c9ff66}.slotcount{font-size:12px;color:var(--muted)}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.action{min-height:72px;border:1px solid #2d6181;border-radius:14px;background:linear-gradient(145deg,#0d3150,#091b2c);cursor:pointer;padding:10px;text-align:left}.action:active,.action.active{box-shadow:0 0 0 2px #58cfff55,0 0 25px #48caff22}.action .icon{font-size:21px}.action b{display:block;margin-top:5px}.action small{color:var(--muted)}
+.attack-list{display:grid;gap:7px}.attack{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;padding:9px;border:1px solid #203f58;border-radius:12px;background:#081827;cursor:pointer}.attack .ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#15344b}.attack b{font-size:13px}.attack small{display:block;color:var(--muted);margin-top:2px}.tag{font-size:10px;color:#b9d7e9;border:1px solid #35566d;padding:4px 6px;border-radius:7px}
+.spells{display:grid;gap:6px;max-height:390px;overflow:auto}.spell{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #183247;cursor:pointer}.spell:last-child{border-bottom:0}.spell b{font-size:12px}.spell small{display:block;color:var(--muted)}.prepared{color:var(--green)}
+.condition-row{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}.chip{background:#102a3e;border:1px solid #31546c;border-radius:999px;padding:7px 10px;font-size:11px}.chip button{background:none;border:0;padding:0 0 0 6px;color:#8fa9ba;cursor:pointer}
+.conc{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#081927;border:1px solid #294a61;border-radius:12px;padding:10px}.conc-name{font-weight:600}.conc small{display:block;color:var(--muted);margin-top:2px}.toggle{width:44px;height:25px;border-radius:20px;background:#233c4d;border:1px solid #466174;cursor:pointer}.toggle.on{background:#1d9ec6}.toggle:after{content:"";display:block;width:19px;height:19px;background:white;border-radius:50%;margin:2px;transition:.2s}.toggle.on:after{transform:translateX(18px)}
+.note{font-size:12px;color:var(--muted);line-height:1.5}.quote{font-style:italic;color:#c9d5df;border-left:2px solid var(--gold);padding-left:10px}
+.bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:min(900px,calc(100% - 24px));background:#071522ee;backdrop-filter:blur(18px);border:1px solid #284961;border-radius:18px;display:grid;grid-template-columns:repeat(6,1fr);padding:5px;z-index:10;box-shadow:0 12px 35px #0009}.nav{border:0;background:transparent;border-radius:13px;padding:9px 4px;color:#8fa6b8;cursor:pointer;font-size:11px}.nav.active{background:#12344d;color:white;box-shadow:inset 0 0 18px #31bfff22}.nav span{display:block;font-size:18px;margin-bottom:2px}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;z-index:20}.modal.show{display:flex}.sheet{width:min(720px,100%);background:#091a29;border:1px solid #34536a;border-radius:24px 24px 0 0;padding:18px;max-height:82vh;overflow:auto}.sheet-head{display:flex;justify-content:space-between;align-items:start}.sheet h3{font-size:22px;margin:0}.sheet p{color:#bfd0dd;line-height:1.5}.close{border:1px solid #3a566b;background:#10263a;border-radius:10px;padding:7px 11px;cursor:pointer}
+.rest-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.rest-card{border:1px solid #2b4f68;border-radius:14px;padding:13px;background:#081927}.rest-card h4{margin:0 0 5px}.rest-card p{font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 10px}.rest-primary{background:linear-gradient(135deg,#176c8f,#123c55);border:1px solid #55c9f4;border-radius:12px;padding:11px;width:100%;font-weight:700;cursor:pointer}.rest-secondary{background:#102a3d;border:1px solid #36566b;border-radius:12px;padding:9px;width:100%;cursor:pointer}.hd-track{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.hd-dot{width:24px;height:24px;border-radius:50%;border:1px solid #4c7891;background:#173348}.hd-dot.available{background:#53c9ff;box-shadow:0 0 8px #53c9ff55}.rest-log{margin-top:10px;color:var(--muted);font-size:11px}.rest-warning{color:#e3c783;font-size:11px;margin-top:8px}@media(max-width:700px){.rest-grid{grid-template-columns:1fr}}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:#d7b56d;color:#09131d;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:700;transition:.25s;z-index:30}.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.hero{grid-column:span 2}}
+@media(max-width:700px){.app{padding:10px 10px 90px}.grid{grid-template-columns:1fr}.hero{grid-column:span 1;grid-template-columns:1fr}.actions{grid-template-columns:repeat(2,1fr)}.bottom{width:calc(100% - 12px);bottom:6px}.nav{font-size:9px}}
+
+.spellbook{display:none}.spellbook.show{display:block}.spell-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.filter{border:1px solid var(--line);background:#0c2032;border-radius:12px;padding:9px 12px;cursor:pointer}.filter.active{background:#164766;border-color:#4c91b5}.prepared-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.prepared-count{font-size:24px;font-weight:700}.prepared-count span{font-size:13px;color:var(--muted);font-weight:500}.spell-level{margin-top:14px}.spell-level h3{margin:0 0 8px;color:#c4d5e3;font-size:12px;letter-spacing:.1em;text-transform:uppercase}.spell-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.spell-card{display:flex;align-items:center;gap:10px;background:#091a2a;border:1px solid #1d3b52;border-radius:14px;padding:11px;cursor:pointer}.spell-card.prepared{border-color:#3f9fc7;box-shadow:0 0 14px #31bfff18}.spell-card.domain{border-color:#8b7040;background:#17170f}.spell-card.locked{opacity:.42;cursor:default}.spell-icon{font-size:21px;width:30px;text-align:center}.spell-main{min-width:0;flex:1}.spell-main b{display:block}.spell-main small{display:block;color:var(--muted);margin-top:3px}.spell-badge{font-size:10px;border:1px solid #345b74;border-radius:8px;padding:4px 6px;color:#a9d9ef}.spell-card.prepared .spell-badge{background:#174b65}.spell-card.domain .spell-badge{border-color:#806b42;color:#e3c783}.prep-btn{border:1px solid #36566b;background:#102a3d;border-radius:9px;padding:6px 8px;font-size:11px;cursor:pointer}.prep-btn.on{background:#174f68}.active-spell-panel{border:1px solid #3f9fc7;background:linear-gradient(145deg,#102f45,#071522);box-shadow:0 0 28px #31bfff22}.active-spell-panel .active-title{font-size:22px;font-weight:700}.spell-detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}.spell-detail{background:#081725;border-radius:10px;padding:8px}.spell-detail small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}.spell-detail b{display:block;margin-top:3px;font-size:12px}.cast-row{display:flex;gap:8px;flex-wrap:wrap}.cast-btn{background:linear-gradient(135deg,#1b79a4,#14516e);border:1px solid #55c9f4;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer}.end-btn{background:#351b27;border:1px solid #9c435b;border-radius:12px;padding:11px 14px;cursor:pointer}.searchbox{width:100%;background:#071522;border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--text);outline:none}.locked-note{color:var(--muted);font-size:12px;margin:6px 0 12px}@media(max-width:800px){.spell-grid{grid-template-columns:1fr}.spell-detail-grid{grid-template-columns:repeat(2,1fr)}}
+
+.character-page,.inventory-page,.notes-page{display:none}.character-page.show,.inventory-page.show,.notes-page.show{display:block}
+.page-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.page-header h2{margin:0}.page-actions{display:flex;gap:8px;flex-wrap:wrap}.section-title{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#c4d5e3;margin:4px 0 8px}.ability-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.ability-card{background:#081725;border:1px solid #1d3b52;border-radius:14px;padding:12px;text-align:center}.ability-score{font-size:26px;font-weight:800}.ability-mod{color:#6fd2ff;font-size:13px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}.skill-list,.save-list,.feature-list{display:grid;gap:6px}.skill-row,.save-row,.feature-row,.item-row{display:flex;align-items:center;gap:10px;background:#091a2a;border:1px solid #1d3b52;border-radius:12px;padding:9px 11px}.skill-row b,.save-row b,.feature-row b,.item-main{flex:1}.proficient{color:#74d5ff}.mini{font-size:11px;color:var(--muted)}.feature-row{cursor:pointer}.feature-row:hover{border-color:#4c91b5}.item-row{align-items:flex-start}.item-move{display:flex;flex-direction:column;gap:4px}.move-btn{border:1px solid #36566b;background:#102a3d;color:var(--text);border-radius:7px;padding:3px 7px;cursor:pointer;font-size:12px}.notes-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.notes-list{display:grid;gap:8px}.note-card{background:#091a2a;border:1px solid #1d3b52;border-radius:12px;padding:11px;cursor:pointer}.note-card.active{border-color:#55c9f4}.note-card small{color:var(--muted)}.note-editor textarea,.note-editor input{width:100%;background:#071522;border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--text);box-sizing:border-box}.note-editor textarea{min-height:260px;resize:vertical}.note-editor{display:grid;gap:9px}@media(max-width:800px){.notes-grid{grid-template-columns:1fr}}.item-main b{display:block}.item-main small{display:block;color:var(--muted);margin-top:3px}.item-controls{display:flex;align-items:center;gap:5px}.qty{min-width:28px;text-align:center;font-weight:700}.icon-btn2{border:1px solid #36566b;background:#102a3d;color:var(--text);border-radius:9px;padding:6px 9px;cursor:pointer}.danger{border-color:#8c4053;background:#301924}.inventory-grid{display:grid;grid-template-columns:1.4fr .8fr;gap:12px}.encumber{color:#ff9e9e}.carrybar{height:8px;background:#06111f;border-radius:99px;overflow:hidden;margin-top:8px}.carryfill{height:100%;background:linear-gradient(90deg,#3ba9d3,#d7b56d);width:0}.currency-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.currency input,.edit-field input,.edit-field textarea{width:100%;background:#071522;border:1px solid var(--line);border-radius:10px;padding:9px;color:var(--text)}.currency label,.edit-field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase}.badge2{font-size:10px;border:1px solid #365b72;border-radius:8px;padding:3px 6px;color:#a9d9ef}.attune{color:#e3c783}.empty{padding:18px;text-align:center;color:var(--muted)}@media(max-width:800px){.ability-grid{grid-template-columns:repeat(3,1fr)}.two-col,.inventory-grid{grid-template-columns:1fr}.currency-grid{grid-template-columns:repeat(3,1fr)}}
+
+.rules-page{display:none}.rules-page.show{display:block}.rules-search{font-size:16px}
+.rule-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rule-card{background:#091a2a;border:1px solid #1d3b52;border-radius:14px;padding:14px;cursor:pointer}.rule-card:hover{border-color:#3b7596}.rule-card h3{margin:0 0 5px;font-size:15px}.rule-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.rule-section{margin-top:12px}
+@media(max-width:800px){.rule-grid{grid-template-columns:1fr 1fr}}
+
+.fav-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.fav-card{display:flex;align-items:center;gap:10px;background:#091a2a;border:1px solid #1d3b52;border-radius:13px;padding:10px;cursor:pointer}.fav-card b{flex:1}.pin{color:#e3c783;font-size:18px}.active-effects{display:grid;gap:7px}.effect-card{background:#081927;border:1px solid #3f9fc7;border-radius:12px;padding:10px}.effect-card b{display:block}.effect-card small{color:var(--muted)}.death-box{border:1px solid #7d3e4c;background:#1d1017;border-radius:15px;padding:12px}.death-row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.death-dot{width:26px;height:26px;border-radius:50%;border:1px solid #5d7180;background:#172735}.death-dot.success{background:#3fbf9b}.death-dot.fail{background:#b94c5c}.session-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.session-field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}.session-field input,.session-field textarea{width:100%;background:#071522;border:1px solid var(--line);border-radius:10px;padding:9px;color:var(--text);box-sizing:border-box}.session-field textarea{min-height:100px;resize:vertical}@media(max-width:800px){.fav-grid,.session-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><div class="sigil">⚡</div><div><h1>Thiasus Hypsicerus</h1><div class="subtitle">Satyr · Tempest Cleric · Level 6 · Anthropologist</div></div></div>
+  <div class="header-actions"><button class="small-btn rest-btn" onclick="openRest()">☾ Rest</button><button class="icon-btn" onclick="resetAll()">↺</button></div>
+</header>
+
+<div class="grid">
+  <section class="card hero">
+    <div>
+      <h2>Vitality</h2>
+      <div class="hpbox"><div class="heart">♥</div><div><div class="hpnum" id="hp">45<span> / 45</span></div><div class="hpbar"><div class="hpfill" id="hpfill"></div></div></div></div>
+      <div class="controls"><button onclick="changeHP(1)">+ 1</button><button onclick="changeHP(-1)">− 1</button><button onclick="changeHP(-5)">− 5</button><button onclick="changeHP(5)">+ 5</button></div>
+      <div class="section"><div class="statrow"><div class="stat"><div class="label">Temp HP</div><div class="value" id="temp">0</div><div class="controls" style="margin-top:7px"><button onclick="changeTemp(-5)">−5</button><button onclick="changeTemp(-1)">−1</button><button onclick="changeTemp(1)">+1</button><button onclick="changeTemp(5)">+5</button></div></div><div class="stat"><div class="label">AC</div><div class="value">17</div></div><div class="stat"><div class="label">Speed</div><div class="value">35</div></div></div></div>
+    </div>
+    <div>
+      <h2>Combat Stats</h2>
+      <div class="statrow"><div class="stat"><div class="label">Initiative</div><div class="value">+2</div></div><div class="stat"><div class="label">Spell Attack</div><div class="value">+7</div></div><div class="stat"><div class="label">Save DC</div><div class="value">15</div></div></div>
+      <div class="section"><div class="resource-grid">
+        <div class="resource"><div><div class="name">Channel Divinity</div><div class="sub">2 / short rest</div></div><strong id="cd">2</strong><button onclick="spend('cd',2)">−</button></div>
+        <div class="resource"><div><div class="name">Wrath of the Storm</div><div class="sub">4 / long rest</div></div><strong id="wrath">4</strong><button onclick="spend('wrath',4)">−</button></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Concentration</h2>
+    <div class="conc"><div><div class="conc-name" id="concName">None</div><small id="concDesc">No concentration spell active.</small></div><button class="toggle" id="concToggle" onclick="toggleConc()"></button></div>
+    <div class="section"><h2>Conditions</h2><div class="condition-row" id="conditions"><span class="note">None</span></div><div class="controls"><button onclick="addCondition()">+ Add condition</button></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Spell Slots</h2>
+    <div class="spellslots" id="slots"></div>
+  </section>
+
+  <section class="card">
+    <h2>Quick Actions</h2>
+    <div class="actions">
+      <button class="action" onclick="markAction('Action')"><div class="icon">⚔</div><b>Action</b><small id="actionState">Available</small></button>
+      <button class="action" onclick="markAction('Bonus Action')"><div class="icon">✦</div><b>Bonus Action</b><small id="bonusState">Available</small></button>
+      <button class="action" onclick="markAction('Reaction')"><div class="icon">↻</div><b>Reaction</b><small id="reactionState">Available</small></button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Main Attacks & Cantrips</h2>
+    <div class="attack-list">
+      <div class="attack" onclick="showSpell('Sacred Flame')"><div class="ico">☀</div><div><b>Sacred Flame</b><small>DEX save · 2d8 radiant · 60 ft</small></div><span class="tag">CANTRIP</span></div>
+      <div class="attack" onclick="showSpell('Toll the Dead')"><div class="ico">☠</div><div><b>Toll the Dead</b><small>WIS save · 2d8 / 2d12 necrotic · 60 ft</small></div><span class="tag">CANTRIP</span></div>
+      <div class="attack" onclick="showSpell('Guiding Bolt')"><div class="ico">✹</div><div><b>Guiding Bolt</b><small>+7 to hit · 4d6 radiant · 120 ft</small></div><span class="tag">L1</span></div>
+      <div class="attack" onclick="showSpell('Thunderwave')"><div class="ico">⚡</div><div><b>Thunderwave</b><small>CON save · 2d8 thunder · 15-ft cube</small></div><span class="tag">L1</span></div>
+      <div class="attack" onclick="showSpell('Shatter')"><div class="ico">ϟ</div><div><b>Shatter</b><small>CON save · 3d8 thunder · 60 ft</small></div><span class="tag">L2</span></div>
+      <div class="attack" onclick="showSpell('Spiritual Weapon')"><div class="ico">⚔</div><div><b>Spiritual Weapon</b><small>Bonus action · +7 · 1d8+4 force</small></div><span class="tag">L2</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Prepared Spells · 10</h2>
+    <div class="spells">
+      <div class="spell" onclick="showSpell('Detect Magic')"><span>◌</span><div><b>Detect Magic</b><small>Ritual · concentration</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Fog Cloud')"><span>☁</span><div><b>Fog Cloud</b><small>Concentration · heavily obscured</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Healing Word')"><span>✚</span><div><b>Healing Word</b><small>Bonus action · 60 ft · 1d4+4</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Protection from Evil and Good')"><span>◉</span><div><b>Protection from Evil and Good</b><small>Concentration · touch</small></div><span>L1</span></div>
+      <div class="spell" onclick="showSpell('Aid')"><span>✚</span><div><b>Aid</b><small>8 hours · up to 3 creatures</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Gust of Wind')"><span>≋</span><div><b>Gust of Wind</b><small>Concentration · 60-ft line</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Prayer of Healing')"><span>✚</span><div><b>Prayer of Healing</b><small>10 minutes · up to 6 creatures</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Silence')"><span>◯</span><div><b>Silence</b><small>Ritual · concentration · 120 ft</small></div><span>L2</span></div>
+      <div class="spell" onclick="showSpell('Bestow Curse')"><span>☠</span><div><b>Bestow Curse</b><small>Concentration · touch · WIS save</small></div><span>L3</span></div>
+      <div class="spell" onclick="showSpell('Spirit Guardians')"><span>✥</span><div><b>Spirit Guardians</b><small>Concentration · 15-ft emanation</small></div><span>L3</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Tempest Domain</h2>
+    <div class="attack-list">
+      <div class="attack" onclick="showInfo('Destructive Wrath','Channel Divinity: when you roll lightning or thunder damage, you can maximize it instead of rolling.')"><div class="ico">⚡</div><div><b>Destructive Wrath</b><small>Channel Divinity · maximize lightning/thunder</small></div></div>
+      <div class="attack" onclick="showInfo('Thunderbolt Strike','When you deal lightning damage to a Large or smaller creature, you can push it up to 10 ft.')"><div class="ico">↯</div><div><b>Thunderbolt Strike</b><small>Lightning damage → push up to 10 ft</small></div></div>
+    </div>
+    <div class="section quote">“The storm is not just destruction — it is a reminder of what still lives.”</div>
+  </section>
+
+  <section class="card">
+    <h2>Character Snapshot</h2>
+    <div class="statrow">
+      <div class="stat"><div class="label">STR</div><div class="value">8</div></div>
+      <div class="stat"><div class="label">DEX</div><div class="value">14</div></div>
+      <div class="stat"><div class="label">CON</div><div class="value">14</div></div>
+      <div class="stat"><div class="label">INT</div><div class="value">10</div></div>
+      <div class="stat"><div class="label">WIS</div><div class="value">19</div></div>
+      <div class="stat"><div class="label">CHA</div><div class="value">10</div></div>
+    </div>
+    <div class="section note">Saving throws: STR −1 · DEX +2 · CON +2 · INT +0 · WIS +7 · CHA +3<br>Passive Perception 14 · Proficiency Bonus +3</div>
+  </section>
+
+  <section class="card">
+    <h2>⭐ Favorites</h2>
+    <div id="favoritesList" class="fav-grid"></div>
+    <div class="mini" style="margin-top:8px">Pin spells from the spellbook to keep them one tap away.</div>
+  </section>
+
+  <section class="card">
+    <h2>⚡ Active Effects</h2>
+    <div id="activeEffects" class="active-effects"></div>
+  </section>
+
+  <section class="card" id="deathCard" style="display:none">
+    <h2>☠ Death & Recovery</h2>
+    <div id="deathPanel"></div>
+  </section>
+</div>
+
+<section id="characterPage" class="character-page">
+  <div class="page-header"><div><h2>Character</h2><div class="subtitle">Thiasus Hypsicerus · Satyr · Tempest Cleric · Level 6</div></div><div class="page-actions"><button class="small-btn" onclick="showInfo('Character rules','Core character values are based on Thiasus’s current character sheet. Combat resources remain on the Combat screen.')">Reference</button></div></div>
+  <div class="card"><div class="section-title">Ability Scores</div><div class="ability-grid" id="abilityGrid"></div></div>
+  <div class="two-col">
+    <div class="card"><div class="section-title">Saving Throws</div><div class="save-list" id="saveList"></div></div>
+    <div class="card"><div class="section-title">Skills</div><div class="skill-list" id="skillList"></div></div>
+  </div>
+  <div class="two-col" style="margin-top:12px">
+    <div class="card"><div class="section-title">Proficiencies & Languages</div><div class="note" style="font-size:13px;line-height:1.8"><b>Armor:</b> Light, Medium, Shield, Heavy<br><b>Weapons:</b> Simple, Martial<br><b>Tools:</b> Pan flute<br><b>Languages:</b> Common · Sylvan · Goblin · Merfolk<br><b>Proficiency Bonus:</b> +3</div></div>
+    <div class="card"><div class="section-title">Character Details</div><div class="note" style="font-size:13px;line-height:1.8"><b>Background:</b> Anthropologist<br><b>Creature Type:</b> Fey<br><b>Size:</b> Medium<br><b>Height:</b> 6 ft<br><b>XP:</b> 14,000<br><b>Hit Dice:</b> 6d8</div></div>
+  </div>
+  <div class="card" style="margin-top:12px"><div class="section-title">Features & Traits</div><div class="feature-list" id="featureList"></div></div>
+  <div class="card" style="margin-top:12px"><div class="section-title">Background & Story</div><div class="note" style="font-size:13px;line-height:1.7">Fascinated by other cultures; studies customs, philosophies, laws, rituals, religions, languages and art through firsthand observation of distant settlements and histories.<br><br><b>Adept Linguist:</b> After observing humanoids interacting for 1 day, Thiasus can learn a handful of important words, expressions and gestures for rudimentary communication.<br><br><b>Trinket:</b> Glass orb filled with water with a clockwork goldfish.</div></div>
+</section>
+
+<section id="inventoryPage" class="inventory-page">
+  <div class="page-header"><div><h2>Inventory</h2><div class="subtitle">Equipment · Carrying capacity · Attunement · Currency</div></div><div class="page-actions"><button class="cast-btn" onclick="addInventoryItem()">＋ Add Item</button></div></div>
+  <div class="inventory-grid">
+    <div><div class="card"><div class="section-title">Equipment</div><div id="inventoryList"></div></div></div>
+    <div>
+      <div class="card"><div class="section-title">Carrying Capacity</div><div style="display:flex;justify-content:space-between"><b id="weightText">49.1 / 120 lb</b><span class="mini" id="pushText">Push/Drag/Lift 240 lb</span></div><div class="carrybar"><div class="carryfill" id="carryFill"></div></div><div class="note" style="margin-top:8px">Capacity based on STR 8. Weight can be edited per item.</div></div>
+      <div class="card"><div class="section-title">Attunement</div><div id="attuneText">0 / 3</div><div id="attuneList" class="item-list" style="margin-top:8px"></div></div>
+      <div class="card"><div class="section-title">Currency</div><div class="currency-grid" id="currencyGrid"></div></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="rulesPage" class="rules-page">
+ <div class="page-header"><div><h2>Quick Rules</h2><div class="subtitle">2014 / legacy 5e reference · optimized for game night</div></div></div>
+ <div class="card"><input id="rulesSearch" class="searchbox rules-search" placeholder="Search rules… e.g. concentration, cover, prone" oninput="renderRules()"></div>
+ <div id="rulesList" class="rule-grid rule-section"></div>
+</section>
+
+<section id="notesPage" class="notes-page">
+<div class="page-header"><div><h2>Campaign Notes</h2><div class="subtitle">Session notes · NPCs · clues · ideas · reminders</div></div><div class="page-actions"><button class="cast-btn" onclick="addNote()">＋ New Note</button></div></div>
+<div class="notes-grid"><div class="card"><div class="section-title">Notes</div><div id="notesList" class="notes-list"></div></div><div class="card note-editor"><div class="section-title">Editor</div><input id="noteTitle" placeholder="Note title" oninput="saveCurrentNote()"><textarea id="noteBody" placeholder="Write your campaign notes here…" oninput="saveCurrentNote()"></textarea><div class="cast-row"><button class="small-btn" onclick="addNote()">＋ New</button><button class="end-btn" onclick="deleteCurrentNote()">Delete</button></div><div class="mini">Notes are saved automatically on this device.</div></div></div>
+<div class="card" style="margin-top:12px"><div class="section-title">Current Session</div><div class="session-grid"><div class="session-field"><label>Session</label><input id="sessionTitle" placeholder="Session 14" oninput="saveSession()"></div><div class="session-field"><label>Location</label><input id="sessionLocation" placeholder="The Sunken Temple" oninput="saveSession()"></div><div class="session-field"><label>Objectives</label><textarea id="sessionObjectives" placeholder="What are we trying to accomplish?" oninput="saveSession()"></textarea></div><div class="session-field"><label>NPCs</label><textarea id="sessionNpcs" placeholder="Names, allies, suspects…" oninput="saveSession()"></textarea></div><div class="session-field"><label>Clues</label><textarea id="sessionClues" placeholder="Important discoveries…" oninput="saveSession()"></textarea></div><div class="session-field"><label>Loot</label><textarea id="sessionLoot" placeholder="Items, money, rewards…" oninput="saveSession()"></textarea></div></div><div class="mini" style="margin-top:8px">Session data is saved automatically on this device.</div></div>
+</section>
+
+<section id="spellbook" class="spellbook">
+  <div class="card">
+    <div class="prepared-summary">
+      <div><h2 style="margin-bottom:4px">Spellbook & Preparation</h2><div class="note">2014 Cleric rules · Change prepared spells when you finish a Long Rest.</div></div>
+      <div style="text-align:right"><div class="prepared-count"><span id="prepCount">10</span><span> / 10 prepared</span></div><div class="note">WIS + Cleric level</div></div>
+    </div>
+    <div class="cast-row" style="margin-bottom:10px">
+      <button class="cast-btn" onclick="enterPrepareMode()">✦ Prepare Spells</button>
+      <button class="small-btn" onclick="finishLongRestAndPrepare()">☾ Finish Long Rest</button>
+      <button class="small-btn" onclick="showInfo('Preparation rules','At level 6 with Wisdom 19 (+4), Thiasus can prepare 10 Cleric spells. Tempest Domain spells are always prepared and do not count toward the 10. Cantrips are known separately. Changes are committed when you finish a Long Rest.')">Rules</button>
+    </div>
+    <div id="prepareBanner" style="display:none" class="active-spell-panel card">
+      <div class="active-title">✦ Preparation Mode</div>
+      <div class="note" style="margin:6px 0 10px">Select up to 10 non-domain Cleric spells. Your current list remains active until you commit the Long Rest.</div>
+      <div class="cast-row"><button class="cast-btn" onclick="commitPreparation()">✓ Finish Long Rest & Commit</button><button class="end-btn" onclick="cancelPreparation()">Cancel Changes</button></div>
+    </div>
+    <input id="spellSearch" class="searchbox" placeholder="Search Cleric spells…" oninput="renderSpellbook()">
+    <div class="spell-toolbar" style="margin-top:10px">
+      <button class="filter active" data-filter="prepared" onclick="setSpellFilter('prepared')">Prepared</button>
+      <button class="filter" data-filter="all" onclick="setSpellFilter('all')">All Cleric</button>
+      <button class="filter" data-filter="domain" onclick="setSpellFilter('domain')">Tempest Domain</button>
+      <button class="filter" data-filter="0" onclick="setSpellFilter('0')">Cantrips</button>
+      <button class="filter" data-filter="1" onclick="setSpellFilter('1')">L1</button>
+      <button class="filter" data-filter="2" onclick="setSpellFilter('2')">L2</button>
+      <button class="filter" data-filter="3" onclick="setSpellFilter('3')">L3</button>
+      <button class="filter" data-filter="4" onclick="setSpellFilter('4')">L4+</button>
+    </div>
+  </div>
+  <div id="activeSpell"></div>
+  <div id="spellbookList"></div>
+</section>
+
+<nav class="bottom">
+  <button class="nav active" id="navCombat" onclick="showPage('combat')"><span>⚔</span>Combat</button>
+  <button class="nav" id="navSpells" onclick="showPage('spells')"><span>📖</span>Spells</button>
+  <button class="nav" id="navCharacter" onclick="showPage('character')"><span>♙</span>Character</button>
+  <button class="nav" id="navInventory" onclick="showPage('inventory')"><span>🎒</span>Inventory</button>
+  <button class="nav" id="navRules" onclick="showPage('rules')"><span>📜</span>Rules</button>
+  <button class="nav" id="navNotes" onclick="showPage('notes')"><span>✎</span>Notes</button>
+</nav>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+ <div class="sheet"><div class="sheet-head"><div><h3 id="modalTitle"></h3><div class="subtitle" id="modalSub"></div></div><button class="close" onclick="closeModal()">Close</button></div><p id="modalBody"></p><div id="modalButtons"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const maxHP=45;
+let state={hp:45,temp:0,cd:2,wrath:4,slots:{1:4,2:3,3:3},conc:null,conditions:[],actions:{Action:false,'Bonus Action':false,Reaction:false},hdSpent:0,lastRest:null,unconscious:false,stable:false,dead:false,deathSuccesses:0,deathFailures:0,feyTouched:{dissonant:false,misty:false},effects:{spiritualWeapon:false}};
+const spellData={
+"Sacred Flame":"1 action · 60 ft · Dexterity save. Target takes 2d8 radiant damage on a failed save; no benefit from cover.",
+"Toll the Dead":"1 action · 60 ft · Wisdom save. Target takes 2d8 necrotic damage, or 2d12 if it is missing any hit points.",
+"Guiding Bolt":"1 action · 120 ft · ranged spell attack (+7). Hit: 4d6 radiant. The next attack against the target before the end of your next turn has advantage.",
+"Thunderwave":"1 action · Self (15-ft cube) · Constitution save. 2d8 thunder on a failed save, half on success; failed save also pushes 10 ft.",
+"Shatter":"1 action · 60 ft · 10-ft-radius sphere · Constitution save. 3d8 thunder; inorganic material has disadvantage on the save.",
+"Spiritual Weapon":"Bonus action · 60 ft. Spectral weapon; melee spell attack +7, 1d8+4 force. Bonus action can move it 20 ft and repeat the attack.",
+"Detect Magic":"Ritual · 1 action · Self · concentration up to 10 min. Sense magic within 30 ft.",
+"Fog Cloud":"1 action · 120 ft · concentration up to 1 hour. 20-ft-radius sphere is heavily obscured.",
+"Healing Word":"Bonus action · 60 ft. A creature regains 1d4+4 hit points.",
+"Protection from Evil and Good":"1 action · Touch · concentration up to 10 min. Protects against aberrations, celestials, elementals, fey, fiends and undead.",
+"Aid":"1 action · 30 ft · 8 hours. Up to 3 creatures gain +5 maximum and current hit points.",
+"Gust of Wind":"1 action · Self · 60-ft line · concentration up to 1 min. Strength save or pushed 15 ft; movement toward you is difficult.",
+"Prayer of Healing":"10 minutes · 30 ft. Up to 6 creatures regain 2d8+4 hit points.",
+"Silence":"Ritual · 1 action · 120 ft · concentration up to 10 min. 20-ft-radius sphere; no sound, and verbal spells cannot be cast inside.",
+"Bestow Curse":"1 action · Touch · concentration up to 1 min · Wisdom save. Choose one of the listed curse effects.",
+"Spirit Guardians":"1 action · Self · 15-ft emanation · concentration up to 10 min. Chosen creatures are unaffected; others have halved speed and make a Wisdom save when entering or ending their turn there; 3d8 radiant or necrotic damage, half on success."
+};
+
+function save(){localStorage.setItem('thiasusCockpit',JSON.stringify(state))}
+function load(){try{const s=JSON.parse(localStorage.getItem('thiasusCockpit'));if(s)state=Object.assign(state,s)}catch(e){}}
+function render(){
+ document.getElementById('hp').innerHTML=`${state.hp}<span> / ${maxHP}</span>`;
+ document.getElementById('temp').textContent=state.temp;
+ document.getElementById('hpfill').style.width=Math.max(0,Math.min(100,state.hp/maxHP*100))+'%';
+ document.getElementById('cd').textContent=state.cd; document.getElementById('wrath').textContent=state.wrath;
+ const slots=document.getElementById('slots'); slots.innerHTML='';
+ [1,2,3].forEach(l=>{const total={1:4,2:3,3:3}[l],used=total-state.slots[l];let row=document.createElement('div');row.className='slotrow';row.innerHTML=`<div class="slotlabel">Level ${l}</div><div class="orbs">${Array.from({length:total},(_,i)=>`<button class="orb ${i<state.slots[l]?'full':''} ${i>=state.slots[l]?'used':''}" onclick="useSlot(${l},${i})"></button>`).join('')}</div><div class="slotcount">${state.slots[l]} / ${total}</div>`;slots.appendChild(row)});
+ document.getElementById('concName').textContent=state.conc||'None';document.getElementById('concDesc').textContent=state.conc?'Concentration active — tap the switch to end it.':'No concentration spell active.';
+ document.getElementById('concToggle').classList.toggle('on',!!state.conc);
+ const c=document.getElementById('conditions'); c.innerHTML=state.conditions.length?state.conditions.map((x,i)=>`<span class="chip">${x}<button onclick="removeCondition(${i})">×</button></span>`).join(''):'<span class="note">None</span>';
+ ['Action','Bonus Action','Reaction'].forEach(a=>document.getElementById(a==='Bonus Action'?'bonusState':a.toLowerCase()+'State').textContent=state.actions[a]?'Used':'Available');
+ save();
+}
+function changeHP(n){
+ if(state.dead){toast('Thiasus is dead');return}
+ if(n<0 && state.hp===0){state.deathFailures=Math.min(3,(state.deathFailures||0)+(Math.abs(n)>=maxHP?2:1));if(state.deathFailures>=3)state.dead=true;save();render();return}
+ if(n<0){state.hp=Math.max(0,state.hp+n);if(state.hp===0){state.unconscious=true;state.stable=false;state.actions={Action:false,'Bonus Action':false,Reaction:false}}}
+ else {state.hp=Math.min(maxHP,state.hp+n);if(n>0 && state.hp>0){state.unconscious=false;state.stable=false;state.deathSuccesses=0;state.deathFailures=0}}
+ render();toast(n>0?`Healed ${n} HP`:`Took ${Math.abs(n)} damage`)
+}
+function changeTemp(n){state.temp=Math.max(0,state.temp+n);render();toast(`Temp HP: ${state.temp}`)}
+function changeCurrency(k,n){currency[k]=Math.max(0,(Number(currency[k])||0)+n);renderInventory();toast(`${k.toUpperCase()}: ${currency[k]}`)}
+
+function spend(k,max){if(state[k]>0){state[k]--;render();toast(`${k==='cd'?'Channel Divinity':'Wrath of the Storm'} used`)}else toast('No uses remaining')}
+function useSlot(l,i){if(i<state.slots[l]){state.slots[l]--;render();toast(`Level ${l} spell slot used`)}else{state.slots[l]++;render();toast(`Level ${l} spell slot restored`)}}
+function markAction(a){state.actions[a]=!state.actions[a];render();toast(`${a}: ${state.actions[a]?'USED':'AVAILABLE'}`)}
+function toggleConc(){state.conc=state.conc?null:'Select a spell';render();if(state.conc==='Select a spell')showInfo('Concentration','Tap a concentration spell such as Spirit Guardians, Call Lightning, Sleet Storm, Silence, Fog Cloud, or Protection from Evil and Good to set it as active.')}
+function addCondition(){const x=prompt('Condition name (e.g. Prone, Frightened, Concentrating):');if(x){state.conditions.push(x.trim());render()}}
+function removeCondition(i){state.conditions.splice(i,1);render()}
+function showSpell(name){openCast(name)}
+function showInfo(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalSub').textContent='Thiasus · Tempest Domain';document.getElementById('modalBody').textContent=body;document.getElementById('modalButtons').innerHTML='';document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1400)}
+
+const quickRules=[
+['Actions in Combat','Action','On your turn you can take one action. Common options include Attack, Cast a Spell, Dash, Disengage, Dodge, Help, Hide, Ready, Search and Use an Object.'],
+['Bonus Action','Bonus Action','You can take a bonus action only when a feature, spell or other rule gives you one. You normally have only one bonus action per turn.'],
+['Reaction','Reaction','A reaction is an instant response triggered by a condition. After using it, you cannot use another until the start of your next turn.'],
+['Movement','Movement','Your speed is 35 ft. You can split movement around your action and bonus action. Difficult terrain costs 2 ft of movement for each 1 ft moved.'],
+['Opportunity Attack','Reaction','Leaving an enemy’s reach normally lets that creature make one opportunity attack. Disengaging prevents it.'],
+['Cover','Combat','Half cover: +2 AC and Dexterity saves. Three-quarters cover: +5. Total cover prevents direct targeting.'],
+['Concentration','Spellcasting','You can concentrate on only one concentration spell at a time. Taking damage requires a Constitution save: DC 10 or half the damage, whichever is higher.'],
+['Advantage / Disadvantage','Core','Roll two d20s and use the higher for advantage or lower for disadvantage. Multiple sources do not stack.'],
+['Grappled','Condition','Speed becomes 0 and cannot benefit from bonuses to speed. The condition ends if the grappler becomes incapacitated or an effect moves the creature out of reach.'],
+['Prone','Condition','A prone creature can crawl, attacks against it have advantage within 5 ft, and its own attacks have disadvantage. Standing costs half your speed.'],
+['Restrained','Condition','Speed 0; attacks against the creature have advantage; its attacks have disadvantage; Dexterity saves have disadvantage.'],
+['Stunned','Condition','Incapacitated, cannot move, can speak only falteringly, automatically fails Strength and Dexterity saves, and attacks against it have advantage.'],
+['Frightened','Condition','Disadvantage on ability checks and attacks while the source of fear is in line of sight; cannot willingly move closer to the source.'],
+['Poisoned','Condition','Disadvantage on attack rolls and ability checks.'],
+['Incapacitated','Condition','Cannot take actions or reactions.'],
+['Unconscious','Condition','Incapacitated, cannot move or speak, unaware, automatically fails Strength and Dexterity saves, attacks against have advantage, and attacks from within 5 ft are critical hits.'],
+['Death Saves','0 HP','At 0 HP, roll a d20 at the start of your turn. 10+ is a success; below 10 is a failure. Three successes stabilize; three failures mean death. A natural 1 counts as two failures; a natural 20 restores 1 HP.'],
+['Critical Hit','Attacks','Roll all attack damage dice twice, then add modifiers normally.'],
+['Spellcasting','Magic','A spell’s casting time determines whether it uses an action, bonus action, reaction or longer. A spell with a verbal component cannot be cast inside the area of Silence.'],
+['Ritual Casting','Magic','A spell with the ritual tag can be cast as a ritual if you have it prepared or in your ritual book as appropriate; it takes 10 minutes longer and does not use a spell slot.'],
+['Opportunity & Ranged Attacks','Combat','Making a ranged attack while an enemy is within 5 ft normally imposes disadvantage.'],
+['Ready','Combat','Choose an action and a trigger. When the trigger occurs, you can use your reaction to perform the readied action.'],
+['Dodge','Combat','Until your next turn, attacks against you have disadvantage if you can see the attacker, and you have advantage on Dexterity saves.'],
+['Dash / Disengage','Combat','Dash gives extra movement equal to your speed. Disengage prevents opportunity attacks for the rest of the turn.'],
+['Healing','HP','Healing restores current HP, up to your maximum. Excess healing is lost. Temporary HP are separate from normal HP and do not stack with each other.']
+];
+function renderRules(){
+ const q=(document.getElementById('rulesSearch')?.value||'').toLowerCase();
+ const list=document.getElementById('rulesList'); if(!list)return;
+ const rows=quickRules.filter(r=>r.join(' ').toLowerCase().includes(q));
+ list.innerHTML=rows.map((r,i)=>`<div class="rule-card" onclick="showInfo(${JSON.stringify(r[0])},${JSON.stringify(r[2])})"><h3>${escapeHtml(r[0])}</h3><p>${escapeHtml(r[1])}</p></div>`).join('')||'<div class="empty">No matching rules.</div>';
+}
+function resetAll(){if(confirm('Reset combat resources?')){state={hp:45,temp:0,cd:2,wrath:4,slots:{1:4,2:3,3:3},conc:null,conditions:[],actions:{Action:false,'Bonus Action':false,Reaction:false}};render();toast('Combat reset')}}
+load();render();
+
+let currentPrepared=JSON.parse(localStorage.getItem('thiasusPrepared')||'null')||['Detect Magic','Guiding Bolt','Healing Word','Protection from Evil and Good','Aid','Prayer of Healing','Silence','Bestow Curse','Spirit Guardians','Spiritual Weapon'];
+const currentCantrips=['Sacred Flame','Spare the Dying','Thaumaturgy','Toll the Dead'];
+let draftPrepared=[...currentPrepared];
+let preparing=false;
+const domainSpells={
+  1:['Fog Cloud','Thunderwave'],2:['Gust of Wind','Shatter'],3:['Call Lightning','Sleet Storm'],4:['Control Water','Ice Storm'],5:['Destructive Wave','Insect Plague']
+};
+const clericList={
+0:['Guidance','Light','Mending','Resistance','Sacred Flame','Spare the Dying','Thaumaturgy'],
+1:['Bane','Bless','Command','Create or Destroy Water','Cure Wounds','Detect Evil and Good','Detect Magic','Detect Poison and Disease','Guiding Bolt','Healing Word','Inflict Wounds','Protection from Evil and Good','Purify Food and Drink','Sanctuary','Shield of Faith'],
+2:['Aid','Augury','Blindness/Deafness','Calm Emotions','Continual Flame','Enhance Ability','Find Traps','Gentle Repose','Hold Person','Lesser Restoration','Locate Object','Prayer of Healing','Protection from Poison','Silence','Spiritual Weapon','Warding Bond','Zone of Truth'],
+3:['Animate Dead','Beacon of Hope','Bestow Curse','Clairvoyance','Create Food and Water','Daylight','Dispel Magic','Glyph of Warding','Magic Circle','Mass Healing Word','Meld into Stone','Protection from Energy','Remove Curse','Revivify','Sending','Speak with Dead','Spirit Guardians','Tongues','Water Walk'],
+4:['Banishment','Control Water','Death Ward','Divination','Freedom of Movement','Guardian of Faith','Locate Creature','Stone Shape'],
+5:['Commune','Contagion','Dispel Evil and Good','Flame Strike','Geas','Greater Restoration','Hallow','Insect Plague','Legend Lore','Mass Cure Wounds','Planar Binding','Raise Dead','Scrying'],
+6:['Blade Barrier','Create Undead','Find the Path','Forbiddance','Harm','Heal','Heroes’ Feast','Planar Ally','True Seeing','Word of Recall'],
+7:['Conjure Celestial','Divine Word','Etherealness','Fire Storm','Plane Shift','Regenerate','Resurrection','Symbol'],
+8:['Antimagic Field','Control Weather','Earthquake','Holy Aura'],
+9:['Astral Projection','Gate','Mass Heal','True Resurrection']
+};
+let spellFilter='prepared';
+function spellLevel(n){return n===0?'Cantrip':`Level ${n}`}
+function isDomain(name){return Object.entries(domainSpells).some(([l,a])=>a.includes(name))}
+function spellKnown(name){return currentPrepared.includes(name)||currentCantrips.includes(name)||isDomain(name)}
+function spellSummary(name,l){
+ const d=spellData[name]; if(d) return d;
+ const domain=isDomain(name)?' · Tempest Domain · always prepared':'';
+ return `${spellLevel(l)}${domain} · Tap for spell reference.`;
+}
+function setSpellFilter(f){
+ spellFilter=f;
+ document.querySelectorAll('.filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
+ renderSpellbook();
+}
+function showPage(page){
+ const combatSections=[...document.querySelectorAll('.app > header, .app > .grid')];
+ const book=document.getElementById('spellbook'), character=document.getElementById('characterPage'), inventory=document.getElementById('inventoryPage'), notes=document.getElementById('notesPage'), rules=document.getElementById('rulesPage');
+ [book,character,inventory,notes,rules].forEach(x=>x.classList.remove('show'));
+ combatSections.forEach(x=>x.style.display='none');
+ document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+ if(page==='combat'){
+   combatSections.forEach(x=>x.style.display=''); document.getElementById('navCombat').classList.add('active');
+ } else if(page==='spells'){
+   book.classList.add('show'); document.getElementById('navSpells').classList.add('active'); renderSpellbook();
+ } else if(page==='character'){
+   character.classList.add('show'); document.getElementById('navCharacter').classList.add('active'); renderCharacter();
+ } else if(page==='inventory'){
+   inventory.classList.add('show'); document.getElementById('navInventory').classList.add('active'); renderInventory();
+ } else if(page==='notes'){
+   notes.classList.add('show'); document.getElementById('navNotes').classList.add('active'); renderNotes();
+ } else if(page==='rules'){
+   rules.classList.add('show'); document.getElementById('navRules').classList.add('active'); renderRules();
+ } else { combatSections.forEach(x=>x.style.display=''); document.getElementById('navCombat').classList.add('active'); }
+}
+
+function enterPrepareMode(){
+ preparing=true; draftPrepared=[...currentPrepared];
+ document.getElementById('prepareBanner').style.display='block';
+ spellFilter='all'; document.querySelectorAll('.filter').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));
+ renderSpellbook(); toast('Preparation mode — choose up to 10');
+}
+function cancelPreparation(){
+ preparing=false; draftPrepared=[...currentPrepared];
+ document.getElementById('prepareBanner').style.display='none'; renderSpellbook(); toast('Preparation changes cancelled');
+}
+function commitPreparation(){
+ if(draftPrepared.length!==10){toast(`Choose exactly 10 spells (${draftPrepared.length}/10)`);return}
+ currentPrepared=[...draftPrepared]; localStorage.setItem('thiasusPrepared',JSON.stringify(currentPrepared));
+ preparing=false; document.getElementById('prepareBanner').style.display='none';
+ renderSpellbook(); toast('Prepared spells updated');
+}
+function openRest(){
+ const spent=state.hdSpent||0, available=6-spent;
+ document.getElementById('modalTitle').textContent='Rest';
+ document.getElementById('modalSub').textContent='2014 rules · Thiasus · 6 Hit Dice (d8)';
+ document.getElementById('modalBody').innerHTML=`
+ <div class="rest-grid">
+  <div class="rest-card">
+   <h4>☀ Long Rest</h4>
+   <p>At least 8 hours. Restore all HP, all spell slots, all Channel Divinity and Wrath of the Storm uses. Recover 3 Hit Dice. End concentration and reset combat actions.</p>
+   <button class="rest-primary" onclick="longRest()">Finish Long Rest</button>
+  </div>
+  <div class="rest-card">
+   <h4>☾ Short Rest</h4>
+   <p>At least 1 hour. Regain both Channel Divinity uses. You may spend Hit Dice to recover HP. Spell slots and Wrath of the Storm do not recover.</p>
+   <button class="rest-primary" onclick="shortRest()">Finish Short Rest</button>
+  </div>
+ </div>
+ <div class="rest-card" style="margin-top:10px">
+  <h4>Hit Dice</h4>
+  <div class="hd-track">${Array.from({length:6},(_,i)=>`<span class="hd-dot ${i>=spent?'available':''}"></span>`).join('')}</div>
+  <div>${available} / 6 available · d8 + 2 per die</div>
+  <div class="rest-warning">During a short rest, spend Hit Dice and roll your physical d8 at the table. The cockpit only records the die spent and the healing you enter.</div>
+  <div class="cast-row" style="margin-top:9px">
+   <button class="rest-secondary" onclick="spendHitDieManual()">＋ Spend 1 Hit Die</button>
+   <button class="rest-secondary" onclick="enterHitDieHealing()">✎ Enter Healing</button>
+  </div>
+  <div class="rest-log">HP: ${state.hp}/${maxHP} · Hit Dice spent: ${spent}/6</div>
+ </div>`;
+ document.getElementById('modalButtons').innerHTML='';
+ document.getElementById('modal').classList.add('show');
+}
+function spendHitDieManual(){
+ if((state.hdSpent||0)>=6){toast('No Hit Dice remaining');return}
+ state.hdSpent=(state.hdSpent||0)+1;save();openRest();toast('Hit Die spent — roll your d8 in real life')
+}
+function enterHitDieHealing(){
+ const v=prompt('How much HP did you regain from the Hit Die?'); if(v===null)return;
+ const heal=Math.max(0,Number(v)||0); if(heal){state.hp=Math.min(maxHP,state.hp+heal);state.unconscious=false;state.stable=false;state.deathSuccesses=0;state.deathFailures=0;save();render();openRest();toast(`Recorded ${heal} HP healing`)}}
+function shortRest(){
+ state.cd=2;
+ state.actions={Action:false,'Bonus Action':false,Reaction:false};
+ state.lastRest='short';
+ save(); render(); closeModal(); toast('Short Rest complete · Channel Divinity restored');
+}
+function longRest(){
+ if(preparing){commitPreparation(); if(preparing)return;}
+ state.hp=maxHP; state.temp=0; state.slots={1:4,2:3,3:3}; state.cd=2; state.wrath=4;
+ state.conc=null; state.conditions=[]; state.effects={spiritualWeapon:false}; state.actions={Action:false,'Bonus Action':false,Reaction:false};
+ state.hdSpent=Math.max(0,(state.hdSpent||0)-3); state.unconscious=false; state.stable=false; state.dead=false; state.deathSuccesses=0; state.deathFailures=0; state.feyTouched={dissonant:false,misty:false}; state.lastRest='long';
+ save(); render(); closeModal();
+ toast('Long Rest complete · HP, slots and resources restored');
+}
+function finishLongRestAndPrepare(){ longRest(); }
+function togglePrepared(name){
+ if(isDomain(name)||currentCantrips.includes(name)||!preparing) return;
+ const i=draftPrepared.indexOf(name);
+ if(i>=0){draftPrepared.splice(i,1);toast(`${name} removed`)}
+ else if(draftPrepared.length<10){draftPrepared.push(name);toast(`${name} selected`)}
+ else {toast('Preparation limit: 10 spells')}
+ renderSpellbook();
+}
+function activePrepared(){return preparing?draftPrepared:currentPrepared}
+function renderSpellbook(){
+ const q=(document.getElementById('spellSearch')?.value||'').toLowerCase();
+ const list=document.getElementById('spellbookList'); let html='';
+ let levels;
+ if(['0','1','2','3'].includes(spellFilter)) levels=[Number(spellFilter)];
+ else if(spellFilter==='4') levels=[4,5,6,7,8,9];
+ else levels=[0,1,2,3,4,5,6,7,8,9];
+ levels.forEach(l=>{
+   let names=[];
+   if(spellFilter==='prepared') names=clericList[l].filter(n=>activePrepared().includes(n)||isDomain(n));
+   else if(spellFilter==='domain') names=domainSpells[l]||[];
+   else names=clericList[l].slice();
+   if(spellFilter==='prepared' && l===0) names=clericList[0].filter(n=>currentCantrips.includes(n));
+   names=names.filter(n=>n.toLowerCase().includes(q));
+   if(names.length===0)return;
+   html+=`<div class="card spell-level"><h3>${spellLevel(l)} ${l>3?'· Locked until level '+(l+1):''}</h3><div class="spell-grid">`;
+   names.forEach(name=>{
+      const dom=isDomain(name), canPrepare=l>0&&l<=3&&!dom, prep=activePrepared().includes(name), locked=l>3;
+      const icon=dom?'⚡':(l===0?'✦':'✧');
+      const clickAction=locked ? `showInfo('Spell locked','Thiasus is level 6 and does not yet have access to this spell level.')` : `openCast(${JSON.stringify(name)})`;
+      html+=`<div class="spell-card ${prep?'prepared ':''}${dom?'domain ':''}${locked?'locked':''}" onclick="${clickAction}">`;
+      html+=`<div class="spell-icon">${icon}</div><div class="spell-main"><b>${name}</b><small>${spellSummary(name,l)}</small></div>`;
+      if(dom) html+=`<span class="spell-badge">ALWAYS</span>`;
+      else if(l===0 && currentCantrips.includes(name)) html+=`<span class="spell-badge">KNOWN</span>`;
+      else if(canPrepare) html+=`<button class="prep-btn ${prep?'on':''}" onclick="event.stopPropagation();togglePrepared(${JSON.stringify(name)})">${prep?'✓ Selected':'+ Prepare'}</button>`;
+      html+=`</div>`;
+   }); html+='</div></div>';
+ });
+ list.innerHTML=html||'<div class="card"><div class="note">No spells match this filter.</div></div>';
+ document.getElementById('prepCount').textContent=activePrepared().length;
+ renderActiveSpell();
+}
+function showSpellBookCard(name,l){
+ const dom=isDomain(name); const prep=activePrepared().includes(name); const canPrepare=l>0&&l<=3&&!dom;
+ document.getElementById('modalTitle').textContent=name;
+ document.getElementById('modalSub').textContent=`${spellLevel(l)}${dom?' · Tempest Domain · Always Prepared':''}`;
+ document.getElementById('modalBody').innerHTML=`<p>${spellData[name]||'This spell is available in the 2014 Player’s Handbook Cleric spell list. Detailed rules text can be added to this spell card in a later pass.'}</p>${canPrepare&&preparing?`<button class="small-btn" onclick="togglePrepared(${JSON.stringify(name)});closeModal()">${prep?'Remove from Selection':'Select Spell'}</button>`:''}`;
+ document.getElementById('modalButtons').innerHTML=`<button class="small-btn" onclick="closeModal()">Done</button>`;
+ document.getElementById('modal').classList.add('show');
+}
+function renderActiveSpell(){
+ const el=document.getElementById('activeSpell'); if(!el)return;
+ if(!state.conc){el.innerHTML='';return}
+ el.innerHTML=`<div class="card active-spell-panel"><div class="active-title">⚡ ${state.conc}</div><div class="subtitle">ACTIVE CONCENTRATION</div><div class="spell-detail-grid"><div class="spell-detail"><small>Save DC</small><b>15</b></div><div class="spell-detail"><small>Spell Attack</small><b>+7</b></div><div class="spell-detail"><small>Duration</small><b>Concentration</b></div><div class="spell-detail"><small>Status</small><b>Active</b></div></div><div class="cast-row"><button class="end-btn" onclick="state.conc=null;save();render();renderActiveSpell();toast('Concentration ended')">End Concentration</button></div></div>`;
+}
+const oldRender=render;
+render=function(){oldRender();renderActiveSpell();renderFavorites();renderActiveEffects();renderDeathPanel()};
+
+
+
+let favorites=JSON.parse(localStorage.getItem('thiasusFavorites')||'null')||['Guiding Bolt','Healing Word','Spirit Guardians','Spiritual Weapon','Thunderwave','Shatter'];
+const spellActionMap={
+ 'Healing Word':'Bonus Action','Spiritual Weapon':'Bonus Action','Misty Step':'Bonus Action',
+ 'Sacred Flame':'Action','Toll the Dead':'Action','Guiding Bolt':'Action','Thunderwave':'Action','Shatter':'Action','Spirit Guardians':'Action','Sleet Storm':'Action','Call Lightning':'Action','Fog Cloud':'Action','Silence':'Action','Protection from Evil and Good':'Action','Bestow Curse':'Action','Aid':'Action'
+};
+const concentrationSpells=new Set(['Detect Magic','Fog Cloud','Protection from Evil and Good','Gust of Wind','Silence','Bestow Curse','Call Lightning','Sleet Storm','Spirit Guardians']);
+function saveFavorites(){localStorage.setItem('thiasusFavorites',JSON.stringify(favorites))}
+function toggleFavorite(name){const i=favorites.indexOf(name);if(i>=0)favorites.splice(i,1);else if(favorites.length<8)favorites.push(name);else return toast('Favorites full (8 max)');saveFavorites();renderFavorites();renderSpellbook();}
+function renderFavorites(){const el=document.getElementById('favoritesList');if(!el)return;el.innerHTML=favorites.length?favorites.map(n=>`<div class="fav-card" onclick="openCast('${String(n).replace(/'/g,"\\'")}')"><span class="pin">★</span><b>${escapeHtml(n)}</b><span>›</span></div>`).join(''):'<div class="empty">No favorites yet.</div>'}
+function renderActiveEffects(){const el=document.getElementById('activeEffects');if(!el)return;let a=[];if(state.conc)a.push(`<div class="effect-card"><b>⚡ ${escapeHtml(state.conc)}</b><small>Concentration active · Save DC 15</small></div>`);if(state.effects?.spiritualWeapon)a.push(`<div class="effect-card"><b>⚔ Spiritual Weapon</b><small>Active for up to 1 minute · Bonus Action to move/attack</small><button class="end-btn" style="margin-top:7px" onclick="state.effects.spiritualWeapon=false;save();render();toast('Spiritual Weapon ended')">End</button></div>`);if(state.conditions?.length)state.conditions.forEach(c=>a.push(`<div class="effect-card"><b>◆ ${escapeHtml(c)}</b><small>Condition active</small></div>`));el.innerHTML=a.join('')||'<div class="empty">No active effects.</div>'}
+function renderDeathPanel(){const card=document.getElementById('deathCard'),el=document.getElementById('deathPanel');if(!card||!el)return;card.style.display=(state.hp===0||state.unconscious||state.dead||state.stable)?'block':'none';if(card.style.display==='none')return;if(state.dead){el.innerHTML='<div class="death-box"><b>☠ DEAD</b><div class="mini" style="margin-top:6px">Thiasus has 3 death save failures.</div></div>';return}el.innerHTML=`<div class="death-box"><b>${state.stable?'☘ STABLE':'⚠ UNCONSCIOUS'}</b><div class="mini" style="margin-top:5px">Roll your d20 in real life at the start of your turn. Record the result below.</div><div class="death-row"><span class="death-dot success"></span><span class="death-dot success"></span><span class="death-dot success"></span></div><div class="mini">Successes: ${state.deathSuccesses||0}/3</div><div class="death-row"><span class="death-dot fail"></span><span class="death-dot fail"></span><span class="death-dot fail"></span></div><div class="mini">Failures: ${state.deathFailures||0}/3</div><div class="cast-row" style="margin-top:9px"><button class="rest-secondary" onclick="recordDeath('success')">✓ Success</button><button class="rest-secondary" onclick="recordDeath('failure')">✕ Failure</button><button class="rest-secondary" onclick="recordDeath('nat1')">1 — 2 Failures</button><button class="rest-secondary" onclick="recordDeath('nat20')">20 — +1 HP</button><button class="small-btn" onclick="stabilize()">☘ Stabilize</button></div></div>`}
+function recordDeath(result){if(state.dead||state.hp>0)return;if(result==='success')state.deathSuccesses=(state.deathSuccesses||0)+1;if(result==='failure')state.deathFailures=(state.deathFailures||0)+1;if(result==='nat1')state.deathFailures=(state.deathFailures||0)+2;if(result==='nat20'){state.hp=1;state.unconscious=false;state.stable=false;state.deathSuccesses=0;state.deathFailures=0;save();render();toast('Natural 20 — regained 1 HP');return}if(state.deathSuccesses>=3)state.stable=true;if(state.deathFailures>=3)state.dead=true;save();render();}
+function stabilize(){if(state.hp!==0||state.dead)return;state.stable=true;state.unconscious=true;state.deathSuccesses=0;state.deathFailures=0;save();render();toast('Thiasus stabilized')}
+function openCast(name){const l=Object.entries(clericList).find(([k,a])=>a.includes(name))?.[0]??(name==='Misty Step'?2:name==='Dissonant Whispers'?1:null);const dom=isDomain(name);document.getElementById('modalTitle').textContent=name;document.getElementById('modalSub').textContent=dom?'Tempest Domain · Always Prepared':(l===0?'Cantrip':`Level ${l}`);document.getElementById('modalBody').innerHTML=`<p>${escapeHtml(spellData[name]||spellSummary(name,Number(l)||1))}</p><div class="cast-row"><button class="small-btn" onclick="toggleFavorite(${JSON.stringify(name)});closeModal()">${favorites.includes(name)?'★ Remove Favorite':'☆ Add Favorite'}</button></div><h4>Cast</h4><div class="cast-row">${l===0?`<button class="cast-btn" onclick="castSpell(${JSON.stringify(name)},0)">Cast · Cantrip</button>`:[1,2,3].filter(x=>x>=Number(l||1)).map(x=>`<button class="cast-btn" onclick="castSpell(${JSON.stringify(name)},${x})">Use L${x} Slot</button>`).join('')}</div>`;document.getElementById('modalButtons').innerHTML='<button class="small-btn" onclick="closeModal()">Done</button>';document.getElementById('modal').classList.add('show')}
+function castSpell(name,level){if(level>0){if(!state.slots[level]){toast(`No level ${level} slots available`);return}state.slots[level]--;}const action=spellActionMap[name]||'Action';if(action)state.actions[action]=true;if(concentrationSpells.has(name)){if(state.conc&&state.conc!==name){toast('End current concentration first');if(level>0)state.slots[level]++;return}state.conc=name}if(name==='Dissonant Whispers')state.feyTouched.dissonant=true;if(name==='Misty Step')state.feyTouched.misty=true;if(name==='Spiritual Weapon')state.effects.spiritualWeapon=true;save();render();closeModal();toast(`${name} cast${level?` with level ${level} slot`:''}`)}
+const abilities={STR:{score:8,mod:-1},DEX:{score:14,mod:2},CON:{score:14,mod:2},INT:{score:10,mod:0},WIS:{score:19,mod:4},CHA:{score:10,mod:0}};
+const saves=[['STR',-1,false],['DEX',2,false],['CON',2,false],['INT',0,false],['WIS',7,true],['CHA',3,true]];
+const skills=[['Acrobatics',2,false],['Animal Handling',4,true],['Arcana',0,false],['Athletics',-1,false],['Deception',0,false],['History',3,true],['Insight',7,true],['Intimidation',0,false],['Investigation',0,false],['Medicine',7,true],['Nature',0,false],['Perception',4,false],['Performance',3,true],['Persuasion',3,true],['Religion',3,true],['Sleight of Hand',2,false],['Stealth',2,false],['Survival',4,false]];
+const features=[['Fey Touched','Cast Dissonant Whispers and Misty Step once per Long Rest without a spell slot; Wisdom is the spellcasting ability.'],['Spellcasting','Cleric spellcasting; prepare 10 spells and use a holy symbol as a spellcasting focus.'],['Channel Divinity','2 uses per Short Rest. Turn Undead and Destructive Wrath use Channel Divinity.'],['Turn Undead','Action; undead within 30 ft make a Wisdom save or are turned for 1 minute or until damaged.'],['Destroy Undead','Undead of CR 1/2 or lower are destroyed when they fail the Turn Undead save.'],['Wrath of the Storm','Reaction; when a creature within 5 ft hits, Dex save or take 2d8 lightning/thunder, half on success. 4 uses per Long Rest.'],['Destructive Wrath','Channel Divinity; maximize lightning or thunder damage instead of rolling.'],['Thunderbolt Strike','When you deal lightning damage to a Large or smaller creature, you can push it up to 10 ft.'],['Satyr — Magic Resistance','Advantage on saving throws against spells and other magical effects.'],['Satyr — Ram','Horn attack; 1d4−1 bludgeoning damage.'],['Mirthful Leaps','Add a d8 to long or high jump distance.']];
+let inventoryState=JSON.parse(localStorage.getItem('thiasusInventory')||'null')||[
+{name:'Explorer’s Pack',qty:1,weight:10,equipped:false,attuned:false},
+{name:'Ink',qty:1,weight:0.1,equipped:false,attuned:false},
+{name:'Ink Pen',qty:1,weight:0,equipped:false,attuned:false},
+{name:'Traveler’s Clothes',qty:1,weight:4,equipped:true,attuned:false},
+{name:'Pouch',qty:1,weight:1,equipped:true,attuned:false},
+{name:'Pan Flute',qty:1,weight:0.5,equipped:true,attuned:false},
+{name:'Chain Shirt',qty:1,weight:20,equipped:true,attuned:false},
+{name:'Shield',qty:1,weight:6,equipped:true,attuned:false},
+{name:'Quarterstaff',qty:1,weight:4,equipped:true,attuned:false},
+{name:'Shortbow',qty:1,weight:2,equipped:true,attuned:false},
+{name:'Arrow',qty:1,weight:0.05,equipped:false,attuned:false}
+];
+let currency=JSON.parse(localStorage.getItem('thiasusCurrency')||'null')||{pp:0,gp:0,ep:0,sp:0,cp:0};
+function invSave(){localStorage.setItem('thiasusInventory',JSON.stringify(inventoryState));localStorage.setItem('thiasusCurrency',JSON.stringify(currency));}
+function fmtMod(n){return n>=0?'+'+n:n}
+function renderCharacter(){
+ document.getElementById('abilityGrid').innerHTML=Object.entries(abilities).map(([k,v])=>`<div class="ability-card"><div class="mini">${k}</div><div class="ability-score">${v.score}</div><div class="ability-mod">${fmtMod(v.mod)}</div></div>`).join('');
+ document.getElementById('saveList').innerHTML=saves.map(x=>`<div class="save-row"><b>${x[0]} Save</b><span class="${x[2]?'proficient':''}">${fmtMod(x[1])}</span>${x[2]?'<span class="badge2">PROF</span>':''}</div>`).join('');
+ document.getElementById('skillList').innerHTML=skills.map(x=>`<div class="skill-row"><b>${x[0]}</b><span class="${x[2]?'proficient':''}">${fmtMod(x[1])}</span>${x[2]?'<span class="badge2">PROF</span>':''}</div>`).join('');
+ document.getElementById('featureList').innerHTML=features.map(x=>`<div class="feature-row" onclick="showInfo(${JSON.stringify(x[0])},${JSON.stringify(x[1])})"><b>${x[0]}</b><span>›</span></div>`).join('');
+}
+function renderInventory(){
+ const list=document.getElementById('inventoryList');
+ if(!inventoryState.length) list.innerHTML='<div class="empty">Inventory empty</div>'; else list.innerHTML=inventoryState.map((it,i)=>`<div class="item-row"><div class="item-main"><b>${it.name} ${it.equipped?'<span class="badge2">EQUIPPED</span>':''} ${it.attuned?'<span class="badge2 attune">ATTUNED</span>':''}</b><small>${it.weight} lb each · ${it.weight*it.qty===0?'no weight':(it.weight*it.qty).toFixed(2)+' lb total'}</small></div><div class="item-controls"><div class="item-move"><button class="move-btn" onclick="moveItem(${i},-1)" title="Move up">▲</button><button class="move-btn" onclick="moveItem(${i},1)" title="Move down">▼</button></div><button class="icon-btn2" onclick="changeItemQty(${i},-1)">−</button><span class="qty">${it.qty}</span><button class="icon-btn2" onclick="changeItemQty(${i},1)">+</button><button class="icon-btn2" onclick="editInventoryItem(${i})">✎</button></div></div>`).join('');
+ const weight=inventoryState.reduce((a,x)=>a+x.qty*x.weight,0); document.getElementById('weightText').textContent=`${weight.toFixed(1)} / 120 lb`;document.getElementById('pushText').textContent='Push/Drag/Lift 240 lb';document.getElementById('carryFill').style.width=Math.min(100,weight/120*100)+'%';document.getElementById('carryFill').classList.toggle('encumber',weight>120);
+ const att=inventoryState.filter(x=>x.attuned);document.getElementById('attuneText').innerHTML=`<b>${att.length} / 3</b> ${att.length>=3?'<span class="mini">(full)</span>':''}`;document.getElementById('attuneList').innerHTML=att.length?att.map(x=>`<div class="mini" style="padding:5px 0">✦ ${x.name}</div>`).join(''):'<div class="mini">No attuned items</div>';
+ document.getElementById('currencyGrid').innerHTML=Object.entries(currency).map(([k,v])=>`<div class="currency"><label>${k}</label><div style="display:flex;align-items:center;gap:5px"><button class="icon-btn2" onclick="changeCurrency('${k}',-1)">−</button><input type="number" min="0" value="${v}" onchange="setCurrency('${k}',this.value)" style="min-width:0;flex:1"><button class="icon-btn2" onclick="changeCurrency('${k}',1)">+</button></div><div class="mini" style="margin-top:5px"><button class="move-btn" onclick="changeCurrency('${k}',-10)">−10</button> <button class="move-btn" onclick="changeCurrency('${k}',10)">+10</button></div></div>`).join(''); invSave();
+}
+function moveItem(i,d){const j=i+d;if(j<0||j>=inventoryState.length)return;[inventoryState[i],inventoryState[j]]=[inventoryState[j],inventoryState[i]];renderInventory();}
+function changeItemQty(i,d){inventoryState[i].qty=Math.max(0,inventoryState[i].qty+d);if(inventoryState[i].qty===0)inventoryState.splice(i,1);renderInventory()}
+function addInventoryItem(){
+ const name=prompt('Item name');if(!name?.trim())return;const qty=Number(prompt('Quantity','1'))||1;const weight=Number(prompt('Weight per item (lb)','0'))||0;inventoryState.push({name:name.trim(),qty:Math.max(1,qty),weight:Math.max(0,weight),equipped:false,attuned:false});renderInventory();toast('Item added')
+}
+function editInventoryItem(i){
+ const it=inventoryState[i];const action=prompt(`${it.name}
+
+Enter new weight in lb, or type EQUIP / UNEQUIP / ATTUNE / UNATTUNE / DELETE`,String(it.weight));if(action===null)return;const a=action.trim().toUpperCase();
+ if(a==='EQUIP'){it.equipped=true}else if(a==='UNEQUIP'){it.equipped=false}else if(a==='ATTUNE'){if(inventoryState.filter(x=>x.attuned).length<3)it.attuned=true;else return toast('Attunement limit: 3')}else if(a==='UNATTUNE'){it.attuned=false}else if(a==='DELETE'){inventoryState.splice(i,1)}else if(!isNaN(Number(action))){it.weight=Math.max(0,Number(action))}else{toast('No change');return}renderInventory()
+}
+let sessionState=JSON.parse(localStorage.getItem('thiasusSession')||'null')||{title:'',location:'',objectives:'',npcs:'',clues:'',loot:''};
+function saveSession(){['Title','Location','Objectives','Npcs','Clues','Loot'].forEach(k=>{const el=document.getElementById('session'+k);if(el)sessionState[k.toLowerCase()]=el.value});localStorage.setItem('thiasusSession',JSON.stringify(sessionState));}
+function renderSession(){Object.entries(sessionState).forEach(([k,v])=>{const el=document.getElementById('session'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.value=v||''})}
+let notesState=JSON.parse(localStorage.getItem('thiasusNotes')||'null')||[{id:Date.now(),title:'Session Notes',body:''}];
+let currentNoteId=notesState[0]?.id||null;
+function saveNotes(){localStorage.setItem('thiasusNotes',JSON.stringify(notesState));}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderNotes(){renderSession();const list=document.getElementById('notesList');if(!notesState.length){list.innerHTML='<div class="empty">No notes yet. Create one.</div>';document.getElementById('noteTitle').value='';document.getElementById('noteBody').value='';return;}if(!notesState.some(n=>n.id===currentNoteId))currentNoteId=notesState[0].id;list.innerHTML=notesState.map(n=>`<div class="note-card ${n.id===currentNoteId?'active':''}" onclick="selectNote(${n.id})"><b>${escapeHtml(n.title||'Untitled')}</b><br><small>${escapeHtml((n.body||'').replace(/\s+/g,' ').slice(0,90))}</small></div>`).join('');const n=notesState.find(x=>x.id===currentNoteId);document.getElementById('noteTitle').value=n?.title||'';document.getElementById('noteBody').value=n?.body||'';}
+function selectNote(id){currentNoteId=id;renderNotes();}
+function addNote(){const n={id:Date.now()+Math.random(),title:'New Note',body:''};notesState.unshift(n);currentNoteId=n.id;saveNotes();renderNotes();setTimeout(()=>document.getElementById('noteTitle').focus(),0);}
+function saveCurrentNote(){const n=notesState.find(x=>x.id===currentNoteId);if(!n)return;n.title=document.getElementById('noteTitle').value;n.body=document.getElementById('noteBody').value;saveNotes();}
+function deleteCurrentNote(){if(!currentNoteId)return;if(!confirm('Delete this note?'))return;notesState=notesState.filter(n=>n.id!==currentNoteId);currentNoteId=notesState[0]?.id||null;saveNotes();renderNotes();}
+
+function setCurrency(k,v){currency[k]=Math.max(0,Number(v)||0);invSave();toast(`${k.toUpperCase()} updated`)}
+
+</script>
+</body>
+</html>
